@@ -1,0 +1,154 @@
+---
+// This project is licensed under the MIT License.
+// See the LICENSE file in the project root for details.
+//
+// Copyright (c) 2026 Florian Reuth <git@florianreuth.de>
+
+import Footer from "../components/Footer.astro";
+import Base from "../layouts/Base.astro";
+import { modules } from "../lib/modules";
+
+const available = modules.filter((module) => module.href);
+---
+
+<Base title="Automata – Formale Sprachen interaktiv" description="Endliche Automaten zeichnen, simulieren, umwandeln und formal beschreiben – direkt im Browser.">
+    <main class="home">
+        <header class="hero">
+            <p class="eyebrow">Formale Sprachen & Automatentheorie</p>
+            <h1>Automata</h1>
+            <p class="lead">
+                Automaten zeichnen, Wörter Schritt für Schritt simulieren und Konstruktionsbeweise nachvollziehen –
+                eine moderne Werkbank im Geiste von JFLAP, direkt im Browser.
+            </p>
+            <a class="button primary cta" href="/endlicher-automat">Endlichen Automaten öffnen</a>
+        </header>
+
+        <section aria-labelledby="modules-heading">
+            <h2 id="modules-heading">Bereiche</h2>
+            <ul class="modules">
+                {available.map((module) => (
+                    <li class="module">
+                        <h3><a href={module.href}>{module.title}</a></h3>
+                        <p>{module.description}</p>
+                        <ul class="features">
+                            {module.features.map((feature) => <li>{feature}</li>)}
+                        </ul>
+                    </li>
+                ))}
+            </ul>
+        </section>
+
+        <Footer/>
+    </main>
+</Base>
+
+<style>
+    .home {
+        width: 100%;
+        max-width: 64rem;
+        margin: 0 auto;
+        padding: 72px 16px 40px;
+    }
+
+    .eyebrow {
+        color: var(--accent);
+        font-size: 0.875rem;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+    }
+
+    h1 {
+        margin-top: 8px;
+        font-size: clamp(2.75rem, 10vw, 4.5rem);
+        font-weight: 680;
+        line-height: 1.05;
+        letter-spacing: -0.04em;
+    }
+
+    .lead {
+        max-width: 40rem;
+        margin-top: 16px;
+        color: var(--muted);
+        font-size: 1.1875rem;
+        text-wrap: pretty;
+    }
+
+    .cta {
+        margin-top: 28px;
+        padding: 10px 18px;
+        font-size: 1rem;
+        text-decoration: none;
+    }
+
+    h2 {
+        margin-top: 72px;
+        font-size: 1.25rem;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+    }
+
+    .modules {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr));
+        gap: 14px;
+        margin-top: 16px;
+        list-style: none;
+    }
+
+    .module {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        padding: 20px;
+        border: 1px solid color-mix(in srgb, var(--accent) 45%, var(--rule));
+        border-radius: 14px;
+        background: var(--surface);
+        transition: border-color 0.2s, transform 0.2s var(--ease);
+    }
+
+    .module:hover {
+        border-color: var(--accent);
+        transform: translateY(-2px);
+    }
+
+    h3 {
+        font-size: 1.0625rem;
+        font-weight: 600;
+        color: var(--ink);
+    }
+
+    h3 a {
+        color: inherit;
+        text-decoration: none;
+    }
+
+    h3 a::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+    }
+
+    .module p {
+        font-size: 0.9375rem;
+        text-wrap: pretty;
+    }
+
+    .features {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: auto;
+        list-style: none;
+    }
+
+    .features li {
+        padding: 1px 8px;
+        border-radius: 999px;
+        background: var(--hover);
+        font-size: 0.75rem;
+        font-weight: 550;
+    }
+</style>

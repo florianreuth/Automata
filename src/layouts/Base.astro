@@ -1,0 +1,39 @@
+---
+// This project is licensed under the MIT License.
+// See the LICENSE file in the project root for details.
+//
+// Copyright (c) 2026 Florian Reuth <git@florianreuth.de>
+
+import "@fontsource-variable/geist";
+import "@fontsource-variable/geist-mono";
+import "../styles/global.css";
+
+interface Props {
+    title: string;
+    description: string;
+}
+
+const { title, description } = Astro.props;
+---
+
+<!doctype html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{title}</title>
+    <meta name="description" content={description}>
+    <meta name="author" content="Florian Reuth">
+    <meta name="theme-color" content="#f8f8fb" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#10111c" media="(prefers-color-scheme: dark)">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+
+    <meta property="og:title" content={title}>
+    <meta property="og:description" content={description}>
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="de_DE">
+</head>
+<body>
+<slot/>
+</body>
+</html>

@@ -1,0 +1,32 @@
+---
+const year = new Date().getFullYear();
+---
+
+<footer>
+    <span>© {year} Florian Reuth</span>
+    <a href="https://github.com/florianreuth/Automata" target="_blank" rel="noopener noreferrer">Quellcode</a>
+    <a href="https://florianreuth.de/imprint" target="_blank" rel="noopener noreferrer">Impressum</a>
+    <a href="https://florianreuth.de/privacy" target="_blank" rel="noopener noreferrer">Datenschutz</a>
+</footer>
+
+<style>
+    footer {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px 20px;
+        margin-top: 64px;
+        font-size: 0.875rem;
+        color: var(--muted);
+    }
+
+    footer a {
+        color: inherit;
+        text-underline-offset: 3px;
+        text-decoration-color: var(--rule);
+    }
+
+    footer a:hover {
+        color: var(--accent);
+        text-decoration-color: currentColor;
+    }
+</style>
