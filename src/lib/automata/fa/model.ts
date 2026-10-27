@@ -15,39 +15,41 @@ export interface FiniteAutomaton extends Machine<FaTransition> {
     kind: "fa";
 }
 
-/**
- * Creates an empty automaton.
- * @param title document title
- * @return a new automaton without states
- */
 export function createFiniteAutomaton(title = "Unbenannter Automat"): FiniteAutomaton {
     return { kind: "fa", title, states: [], transitions: [] };
 }
 
-/**
- * Collects the input alphabet from all non-ε transitions.
- * @param fa the automaton
- * @return the sorted symbols
- */
+/** Sorted input alphabet, collected from all non-ε transitions. */
 export function alphabetOf(fa: FiniteAutomaton): string[] {
     const symbols = new Set(fa.transitions.map((t) => t.symbol).filter((symbol) => symbol !== ""));
     return [...symbols].sort(naturalCompare);
 }
 
-/**
- * Returns the initial state.
- * @param fa the automaton
- * @return the initial state or undefined if none is marked
- */
 export function initialStateOf(fa: FiniteAutomaton): StateNode | undefined {
     return fa.states.find((state) => state.initial);
 }
 
-/**
- * Checks for ε-transitions and multiple transitions on the same symbol.
- * @param fa the automaton
- * @return true if every state has at most one successor per symbol and there are no ε-transitions
- */
+/** States without a path from the initial state; empty if no initial state is marked. */
+export function unreachableStates(fa: FiniteAutomaton): StateNode[] {
+    const initial = initialStateOf(fa);
+    if (!initial) {
+        return [];
+    }
+    const reached = new Set([initial.id]);
+    const stack = [initial.id];
+    while (stack.length > 0) {
+        const current = stack.pop()!;
+        for (const t of fa.transitions) {
+            if (t.from === current && !reached.has(t.to)) {
+                reached.add(t.to);
+                stack.push(t.to);
+            }
+        }
+    }
+    return fa.states.filter((state) => !reached.has(state.id));
+}
+
+/** True if there are no ε-transitions and every state has at most one successor per symbol. */
 export function isDeterministic(fa: FiniteAutomaton): boolean {
     const seen = new Set<string>();
     for (const transition of fa.transitions) {
@@ -63,11 +65,7 @@ export function isDeterministic(fa: FiniteAutomaton): boolean {
     return true;
 }
 
-/**
- * Checks whether every state has exactly one successor per alphabet symbol.
- * @param fa the automaton
- * @return true for a deterministic automaton with a total transition function
- */
+/** True for a deterministic automaton with exactly one successor per state and alphabet symbol. */
 export function isComplete(fa: FiniteAutomaton): boolean {
     if (!isDeterministic(fa)) {
         return false;
@@ -76,20 +74,12 @@ export function isComplete(fa: FiniteAutomaton): boolean {
     return fa.states.every((state) => alphabet.every((symbol) => fa.transitions.some((t) => t.from === state.id && t.symbol === symbol)));
 }
 
-/**
- * Formats a stored symbol for display.
- * @param symbol stored symbol, empty for ε
- * @return the symbol or ε
- */
+/** Formats a stored symbol for display, the empty string becomes ε. */
 export function displaySymbol(symbol: string): string {
     return symbol === "" ? EPSILON : symbol;
 }
 
-/**
- * Parses an edge label such as "0, 1, ε" into stored symbols.
- * @param input user input, symbols separated by commas or whitespace
- * @return the distinct symbols (empty string for ε) or an error message in German
- */
+/** Parses an edge label such as "0, 1, ε" into distinct stored symbols, or returns a German error message. */
 export function parseSymbols(input: string): { symbols: string[] } | { error: string } {
     const parts = input.split(/[,\s]+/).filter((part) => part.length > 0);
     if (parts.length === 0) {
@@ -108,21 +98,12 @@ export function parseSymbols(input: string): { symbols: string[] } | { error: st
     return { symbols: [...symbols] };
 }
 
-/**
- * Formats the symbols of all transitions between two states as an edge label.
- * @param symbols stored symbols
- * @return e.g. "0, 1, ε"
- */
+/** Formats stored symbols as an edge label such as "0, 1, ε". */
 export function formatSymbols(symbols: readonly string[]): string {
     return [...symbols].sort(compareSymbols).map(displaySymbol).join(", ");
 }
 
-/**
- * Sorts ε last and everything else naturally.
- * @param a first stored symbol
- * @param b second stored symbol
- * @return comparison result
- */
+/** Sorts ε last and everything else naturally. */
 export function compareSymbols(a: string, b: string): number {
     if (a === "" || b === "") {
         return a === b ? 0 : a === "" ? 1 : -1;

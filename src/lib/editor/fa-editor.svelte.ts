@@ -59,10 +59,7 @@ export class FaEditor implements GraphEditor<FaTransition> {
         }
     }
 
-    /**
-     * Replaces the whole automaton as one undoable step.
-     * @param fa the new automaton
-     */
+    /** Replaces the whole automaton as one undoable step. */
     replace(fa: FiniteAutomaton): void {
         this.#change(() => {
             this.machine = fa;

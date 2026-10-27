@@ -33,30 +33,17 @@ export interface Machine<T extends Edge = Edge> {
     transitions: T[];
 }
 
-/**
- * Generates a short unique id.
- * @return a random id that is unique within a document
- */
+/** Generates a short random id that is unique within a document. */
 export function createId(): string {
     return Math.random().toString(36).slice(2, 10);
 }
 
-/**
- * Compares state names or symbols naturally so that q2 sorts before q10.
- * @param a first string
- * @param b second string
- * @return negative, zero or positive like localeCompare
- */
+/** Compares state names or symbols naturally so that q2 sorts before q10. */
 export function naturalCompare(a: string, b: string): number {
     return a.localeCompare(b, "de", { numeric: true });
 }
 
-/**
- * Proposes the next free state name with the given prefix.
- * @param states existing states
- * @param prefix name prefix, "q" by default
- * @return the lowest unused name prefix + n
- */
+/** Proposes the lowest unused state name prefix + n. */
 export function nextStateName(states: readonly StateNode[], prefix = "q"): string {
     const used = new Set(states.map((state) => state.name));
     let index = 0;

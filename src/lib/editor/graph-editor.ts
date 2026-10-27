@@ -16,27 +16,16 @@ export interface GraphEditor<T extends Edge = Edge> {
     tool: Tool;
     selection: Selection;
 
-    /**
-     * Captures the current machine before a multi-step change such as dragging.
-     * @return an opaque snapshot to pass to {@link GraphEditor.commit}
-     */
+    /** Captures the machine before a multi-step change such as dragging; pass it to {@link GraphEditor.commit} afterwards. */
     snapshot(): Machine<T>;
 
-    /**
-     * Records a snapshot on the undo stack.
-     * @param before the state before the change
-     */
+    /** Records a snapshot taken before a change on the undo stack. */
     commit(before: Machine<T>): void;
 
     addState(x: number, y: number): string;
     moveState(id: string, x: number, y: number): void;
 
-    /**
-     * Renames a state.
-     * @param id state id
-     * @param name new name
-     * @return a German error message, or null on success
-     */
+    /** Renames a state; returns a German error message, or null on success. */
     renameState(id: string, name: string): string | null;
 
     toggleInitial(id: string): void;
@@ -48,28 +37,13 @@ export interface GraphEditor<T extends Edge = Edge> {
     /** Repositions all states with an automatic layout as one undoable step. */
     arrange(): void;
 
-    /**
-     * Formats the text of an edge group as shown on the canvas.
-     * @param group the transitions between two states
-     * @return the label
-     */
+    /** Formats the label of an edge group as shown on the canvas. */
     edgeLabel(group: EdgeGroup<T>): string;
 
-    /**
-     * Returns the editable text of the edge between two states.
-     * @param from source state id
-     * @param to target state id
-     * @return the text, empty if there is no edge yet
-     */
+    /** Editable text of the edge between two states, empty if there is no edge yet. */
     edgeText(from: string, to: string): string;
 
-    /**
-     * Replaces all transitions between two states by the parsed text.
-     * @param from source state id
-     * @param to target state id
-     * @param text user input
-     * @return a German error message, or null on success
-     */
+    /** Replaces all transitions between two states by the parsed text; returns a German error message, or null on success. */
     applyEdgeText(from: string, to: string, text: string): string | null;
 
     /** Placeholder for the inline edge editor, e.g. "0, 1 oder leer für ε". */

@@ -10,9 +10,7 @@ import { epsilonClosure, move } from "./simulate.ts";
 
 /**
  * Converts an NFA into an equivalent complete DFA using the powerset construction.
- * Only subsets reachable from the initial state are created; the empty subset becomes a trap state if needed.
- * @param fa the source automaton, left untouched
- * @return a new deterministic automaton whose state labels name the represented subsets
+ * Only reachable subsets are created, the empty subset becomes a trap state and state labels name the subsets.
  * @throws Error if the automaton has no initial state
  */
 export function toDfa(fa: FiniteAutomaton): FiniteAutomaton {

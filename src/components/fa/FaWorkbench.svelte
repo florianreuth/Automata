@@ -9,10 +9,9 @@
     import { tick } from "svelte";
     import { toDfa } from "../../lib/automata/fa/convert.ts";
     import { faExamples } from "../../lib/automata/fa/examples.ts";
-    import { createFiniteAutomaton, type FaTransition, type FiniteAutomaton, formatSymbols } from "../../lib/automata/fa/model.ts";
+    import { createFiniteAutomaton, type FaTransition, type FiniteAutomaton } from "../../lib/automata/fa/model.ts";
     import { FaEditor } from "../../lib/editor/fa-editor.svelte.ts";
     import type { Tool } from "../../lib/editor/graph-editor.ts";
-    import type { EdgeGroup } from "../../lib/graph/geometry.ts";
     import { renderMachineSvg } from "../../lib/graph/svg.ts";
     import { faFromJson, faToJson } from "../../lib/io/document.ts";
     import { downloadFile, fileBaseName, pickTextFile, svgToPng } from "../../lib/io/files.ts";
@@ -125,7 +124,7 @@
     }
 
     function diagramSvg() {
-        return renderMachineSvg(editor.machine, (group: EdgeGroup<FaTransition>) => formatSymbols(group.transitions.map((t) => t.symbol)));
+        return renderMachineSvg(editor.machine, (group) => editor.edgeLabel(group));
     }
 
     async function exportPng() {

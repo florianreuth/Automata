@@ -16,6 +16,13 @@ export interface Point {
     y: number;
 }
 
+export interface Box {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+}
+
 /** All transitions between one ordered pair of states, drawn as a single arrow. */
 export interface EdgeGroup<T extends Edge = Edge> {
     key: string;
@@ -32,15 +39,48 @@ export interface EdgeShape {
     labelAnchor: "start" | "middle" | "end";
 }
 
-/**
- * Groups transitions by their (from, to) pair.
- * @param transitions all transitions
- * @return one group per connected pair, in first-seen order
- */
+/** Identifies the arrow from one state to another, see {@link EdgeGroup.key}. */
+export function edgeKey(from: string, to: string): string {
+    return `${from}>${to}`;
+}
+
+/** Routes all edges of one graph snapshot so that reverse edges, self-loops and states in the way stay readable. */
+export class EdgeRouter<T extends Edge = Edge> {
+    readonly groups: EdgeGroup<T>[];
+    /** Loop direction in radians per state id that has a self-loop. */
+    readonly loops: Map<string, number>;
+    readonly #states: readonly StateNode[];
+    readonly #byId: Map<string, StateNode>;
+    readonly #keys: Set<string>;
+
+    constructor(states: readonly StateNode[], transitions: readonly T[]) {
+        this.#states = states;
+        this.#byId = new Map(states.map((state) => [state.id, state]));
+        this.groups = groupEdges(transitions);
+        this.#keys = new Set(this.groups.map((group) => group.key));
+        this.loops = loopDirections(states, transitions);
+    }
+
+    hasEdge(from: string, to: string): boolean {
+        return this.#keys.has(edgeKey(from, to));
+    }
+
+    /** Shape of the arrow between two states, whether or not it exists yet; null if a state is unknown. */
+    shape(from: string, to: string): EdgeShape | null {
+        const a = this.#byId.get(from);
+        const b = this.#byId.get(to);
+        if (!a || !b) {
+            return null;
+        }
+        return edgeShape(a, b, edgeBend(a, b, from !== to && this.hasEdge(to, from), this.#states), this.loops.get(from));
+    }
+}
+
+/** Groups transitions by their (from, to) pair, in first-seen order. */
 export function groupEdges<T extends Edge>(transitions: readonly T[]): EdgeGroup<T>[] {
     const groups = new Map<string, EdgeGroup<T>>();
     for (const transition of transitions) {
-        const key = `${transition.from}>${transition.to}`;
+        const key = edgeKey(transition.from, transition.to);
         let group = groups.get(key);
         if (!group) {
             group = { key, from: transition.from, to: transition.to, transitions: [] };
@@ -52,13 +92,8 @@ export function groupEdges<T extends Edge>(transitions: readonly T[]): EdgeGroup
 }
 
 /**
- * Decides how far an edge is bent: edges with a reverse counterpart bend so both stay visible,
- * and straight edges that would cross another state bend around it.
- * @param from source state
- * @param to target state
- * @param hasReverse whether an edge in the opposite direction exists
- * @param states all states, used as obstacles
- * @return signed offset of the curve apex from the straight line, 0 for a straight edge
+ * Signed offset of the curve apex from the straight line, 0 for a straight edge. Edges with a reverse
+ * counterpart bend so both stay visible, straight edges that would cross another state bend around it.
  */
 export function edgeBend(from: StateNode, to: StateNode, hasReverse: boolean, states: readonly StateNode[]): number {
     const dx = to.x - from.x;
@@ -88,14 +123,7 @@ export function edgeBend(from: StateNode, to: StateNode, hasReverse: boolean, st
     return obstacle > 0 ? -OBSTACLE_BEND : OBSTACLE_BEND;
 }
 
-/**
- * Computes the arrow of an edge group as a straight line or a curve.
- * @param from source state
- * @param to target state
- * @param bend signed apex offset from {@link edgeBend}, 0 for a straight line
- * @param loopDirection direction of a self-loop in radians, see {@link loopDirections}
- * @return path and label anchor
- */
+/** Computes the arrow of an edge group from a {@link edgeBend} offset; loopDirection (radians) only applies to self-loops. */
 export function edgeShape(from: Point, to: Point, bend: number, loopDirection = UP): EdgeShape {
     if (Math.hypot(to.x - from.x, to.y - from.y) < 1) {
         return loopShape(from, loopDirection);
@@ -137,12 +165,7 @@ function anchorFor(horizontalOffset: number): EdgeShape["labelAnchor"] {
     return horizontalOffset > 0 ? "start" : "end";
 }
 
-/**
- * Computes a self-loop pointing away from the state in the given direction.
- * @param center state center
- * @param direction direction in radians, -π/2 points up
- * @return path and label anchor
- */
+/** Computes a self-loop pointing away from the state; direction in radians, -π/2 points up. */
 export function loopShape(center: Point, direction = UP): EdgeShape {
     const out = { x: Math.cos(direction), y: Math.sin(direction) };
     const side = { x: -out.y, y: out.x };
@@ -163,12 +186,7 @@ export function loopShape(center: Point, direction = UP): EdgeShape {
     };
 }
 
-/**
- * Picks for every state with a self-loop the side (up, down, right, left) farthest from its other edges.
- * @param states all states
- * @param transitions all transitions
- * @return loop direction in radians per state id that has a self-loop
- */
+/** Picks for every state with a self-loop the side (up, down, right, left) farthest from its other edges, in radians. */
 export function loopDirections(states: readonly StateNode[], transitions: readonly Edge[]): Map<string, number> {
     const byId = new Map(states.map((state) => [state.id, state]));
     const result = new Map<string, number>();
@@ -199,23 +217,13 @@ export function loopDirections(states: readonly StateNode[], transitions: readon
     return result;
 }
 
-/**
- * Computes the short arrow pointing at the initial state from the left.
- * @param center state center
- * @return SVG path data
- */
+/** SVG path of the short arrow pointing at the initial state from the left. */
 export function initialArrowPath(center: Point): string {
     return `M ${center.x - STATE_RADIUS - 40} ${center.y} L ${center.x - STATE_RADIUS - 2} ${center.y}`;
 }
 
-/**
- * Computes the bounding box of all drawn elements, including loops, labels and the initial arrow.
- * @param states all states
- * @param loops loop directions from {@link loopDirections}
- * @param margin extra space on every side
- * @return the box in canvas coordinates
- */
-export function graphBounds(states: readonly StateNode[], loops: ReadonlyMap<string, number>, margin = 24): { x: number; y: number; width: number; height: number } {
+/** Bounding box of all drawn elements including loops, labels and the initial arrow, grown by margin on every side. */
+export function graphBounds(states: readonly StateNode[], loops: ReadonlyMap<string, number>, margin = 24): Box {
     if (states.length === 0) {
         return { x: 0, y: 0, width: 400, height: 240 };
     }

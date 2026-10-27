@@ -4,7 +4,7 @@
 // Copyright (c) 2026 Florian Reuth <git@florianreuth.de>
 
 import { naturalCompare, type StateNode } from "../machine.ts";
-import { alphabetOf, type FiniteAutomaton, initialStateOf } from "./model.ts";
+import { alphabetOf, type FaTransition, type FiniteAutomaton, initialStateOf } from "./model.ts";
 
 /** The set of active states after reading a prefix of the input. */
 export interface SimulationStep {
@@ -23,12 +23,7 @@ export interface SimulationResult {
     unknownSymbols: string[];
 }
 
-/**
- * Extends a set of states by everything reachable via ε-transitions.
- * @param fa the automaton
- * @param states start states
- * @return the ε-closure, including the start states
- */
+/** Extends a set of states by everything reachable via ε-transitions, including the start states. */
 export function epsilonClosure(fa: FiniteAutomaton, states: Iterable<string>): Set<string> {
     const closure = new Set(states);
     const stack = [...closure];
@@ -44,13 +39,7 @@ export function epsilonClosure(fa: FiniteAutomaton, states: Iterable<string>): S
     return closure;
 }
 
-/**
- * Computes the successors on one symbol, without ε-closure.
- * @param fa the automaton
- * @param states current states
- * @param symbol a non-empty input symbol
- * @return the successor states
- */
+/** Successors of the given states on one non-empty symbol, without ε-closure. */
 export function move(fa: FiniteAutomaton, states: ReadonlySet<string>, symbol: string): Set<string> {
     const result = new Set<string>();
     for (const transition of fa.transitions) {
@@ -61,12 +50,7 @@ export function move(fa: FiniteAutomaton, states: ReadonlySet<string>, symbol: s
     return result;
 }
 
-/**
- * Runs the automaton on a word by tracking all active states at once.
- * @param fa the automaton
- * @param word the input; every character is one symbol
- * @return all intermediate steps and the verdict
- */
+/** Runs the automaton on a word by tracking all active states at once; every character is one symbol. */
 export function simulate(fa: FiniteAutomaton, word: string): SimulationResult {
     const input = [...word];
     const initial = initialStateOf(fa);
@@ -87,10 +71,22 @@ export function simulate(fa: FiniteAutomaton, word: string): SimulationResult {
 }
 
 /**
+ * Transitions taken to reach a step: the symbol moves from the previous step plus the ε-moves inside its closure.
+ * @param step index into {@link SimulationResult.steps}, clamped to the last step
+ */
+export function stepTransitions(fa: FiniteAutomaton, result: SimulationResult, step: number): FaTransition[] {
+    const index = Math.min(step, result.steps.length - 1);
+    const current = result.steps[index].states;
+    const previous = index > 0 ? result.steps[index - 1].states : null;
+    const symbol = result.input[index - 1];
+    return fa.transitions.filter((t) =>
+        t.symbol === "" ? current.has(t.from) && current.has(t.to) : previous !== null && t.symbol === symbol && previous.has(t.from),
+    );
+}
+
+/**
  * Lists every state/symbol pair on which a run dies, i.e. where an error (trap) state is missing.
  * ε-transitions are taken into account, so a symbol readable after an ε-move is not reported.
- * @param fa the automaton
- * @return the pairs, ordered by state name and symbol
  */
 export function missingTransitions(fa: FiniteAutomaton): { state: StateNode; symbol: string }[] {
     const alphabet = alphabetOf(fa);

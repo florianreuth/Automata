@@ -5,20 +5,17 @@
 
 import { createId } from "../automata/machine.ts";
 import type { FiniteAutomaton } from "../automata/fa/model.ts";
+import { escapeMarkup } from "../markup.ts";
 
-/**
- * Serializes a finite automaton into the JFLAP 7 .jff format.
- * @param fa the automaton
- * @return the XML document as string
- */
+/** Serializes a finite automaton into the JFLAP 7 .jff format. */
 export function faToJff(fa: FiniteAutomaton): string {
     const index = new Map(fa.states.map((state, i) => [state.id, i]));
     const lines = ['<?xml version="1.0" encoding="UTF-8" standalone="no"?><!--Created with Automata.-->', "<structure>", "\t<type>fa</type>", "\t<automaton>"];
     for (const state of fa.states) {
-        lines.push(`\t\t<state id="${index.get(state.id)}" name="${escapeXml(state.name)}">`);
+        lines.push(`\t\t<state id="${index.get(state.id)}" name="${escapeMarkup(state.name)}">`);
         lines.push(`\t\t\t<x>${state.x.toFixed(1)}</x>`, `\t\t\t<y>${state.y.toFixed(1)}</y>`);
         if (state.label) {
-            lines.push(`\t\t\t<label>${escapeXml(state.label)}</label>`);
+            lines.push(`\t\t\t<label>${escapeMarkup(state.label)}</label>`);
         }
         if (state.initial) {
             lines.push("\t\t\t<initial/>");
@@ -31,7 +28,7 @@ export function faToJff(fa: FiniteAutomaton): string {
     for (const transition of fa.transitions) {
         lines.push("\t\t<transition>");
         lines.push(`\t\t\t<from>${index.get(transition.from)}</from>`, `\t\t\t<to>${index.get(transition.to)}</to>`);
-        lines.push(transition.symbol === "" ? "\t\t\t<read/>" : `\t\t\t<read>${escapeXml(transition.symbol)}</read>`);
+        lines.push(transition.symbol === "" ? "\t\t\t<read/>" : `\t\t\t<read>${escapeMarkup(transition.symbol)}</read>`);
         lines.push("\t\t</transition>");
     }
     lines.push("\t</automaton>", "</structure>", "");
@@ -40,9 +37,6 @@ export function faToJff(fa: FiniteAutomaton): string {
 
 /**
  * Parses a JFLAP .jff file containing a finite automaton; requires a browser DOMParser.
- * @param xml file contents
- * @param title document title for the imported automaton
- * @return the automaton
  * @throws Error with a German message if the file is malformed or not a finite automaton
  */
 export function faFromJff(xml: string, title: string): FiniteAutomaton {
@@ -88,8 +82,4 @@ export function faFromJff(xml: string, title: string): FiniteAutomaton {
         return { id: createId(), from, to, symbol };
     });
     return { kind: "fa", title, states, transitions };
-}
-
-function escapeXml(text: string): string {
-    return text.replace(/[<>&"']/g, (char) => `&#${char.charCodeAt(0)};`);
 }

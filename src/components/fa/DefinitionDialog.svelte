@@ -14,11 +14,11 @@
         formatCell,
         transitionSignature,
     } from "../../lib/automata/fa/definition.ts";
-    import { displaySymbol, formatSymbols, type FaTransition } from "../../lib/automata/fa/model.ts";
+    import { displaySymbol } from "../../lib/automata/fa/model.ts";
     import type { FaEditor } from "../../lib/editor/fa-editor.svelte.ts";
-    import type { EdgeGroup } from "../../lib/graph/geometry.ts";
     import { renderMachineSvg } from "../../lib/graph/svg.ts";
     import { downloadFile, fileBaseName, svgToPng } from "../../lib/io/files.ts";
+    import { escapeMarkup } from "../../lib/markup.ts";
 
     interface Props {
         editor: FaEditor;
@@ -33,7 +33,7 @@
     let representation = $state<"table" | "graph" | "both">("table");
 
     const definition = $derived(formalDefinition(editor.machine, name.trim() || "A"));
-    const svg = $derived(renderMachineSvg(editor.machine, (group: EdgeGroup<FaTransition>) => formatSymbols(group.transitions.map((t) => t.symbol))));
+    const svg = $derived(renderMachineSvg(editor.machine, (group) => editor.edgeLabel(group)));
     const showTable = $derived(representation !== "graph");
     const showGraph = $derived(representation !== "table");
 
@@ -66,16 +66,12 @@
         frame.style.width = "0";
         frame.style.height = "0";
         frame.style.border = "0";
-        frame.srcdoc = `<!doctype html><html lang="de"><head><meta charset="utf-8"><title>${escapeHtml(editor.machine.title)}</title><style>${PRINT_CSS}</style></head><body>${sheet?.innerHTML ?? ""}</body></html>`;
+        frame.srcdoc = `<!doctype html><html lang="de"><head><meta charset="utf-8"><title>${escapeMarkup(editor.machine.title)}</title><style>${PRINT_CSS}</style></head><body>${sheet?.innerHTML ?? ""}</body></html>`;
         frame.addEventListener("load", () => {
             frame.contentWindow?.print();
             setTimeout(() => frame.remove(), 1000);
         });
         document.body.append(frame);
-    }
-
-    function escapeHtml(text: string) {
-        return text.replace(/[<>&"]/g, (char) => `&#${char.charCodeAt(0)};`);
     }
 
     const PRINT_CSS = `

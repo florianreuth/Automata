@@ -9,13 +9,14 @@
     import { tick } from "svelte";
     import type { Edge, Machine } from "../../lib/automata/machine.ts";
     import type { GraphEditor } from "../../lib/editor/graph-editor.ts";
-    import { edgeBend, edgeShape, graphBounds, groupEdges, initialArrowPath, loopDirections, type Point, STATE_RADIUS } from "../../lib/graph/geometry.ts";
+    import { Viewport } from "../../lib/editor/viewport.svelte.ts";
+    import { EdgeRouter, graphBounds, initialArrowPath, type Point, STATE_RADIUS } from "../../lib/graph/geometry.ts";
 
     interface Props {
         editor: GraphEditor<T>;
         /** State ids highlighted by a running simulation. */
         activeStates?: ReadonlySet<string>;
-        /** Edge keys ("from>to") highlighted by a running simulation. */
+        /** Edge keys (see edgeKey) highlighted by a running simulation. */
         activeEdges?: ReadonlySet<string>;
     }
 
@@ -36,7 +37,7 @@
     let input: HTMLInputElement | undefined = $state();
     let width = $state(0);
     let height = $state(0);
-    let view = $state({ x: 0, y: 0, scale: 1 });
+    const view = new Viewport();
     let interaction = $state<Interaction | null>(null);
     let inline = $state<Inline | null>(null);
     let menu = $state<{ x: number; y: number; target: MenuTarget } | null>(null);
@@ -44,33 +45,30 @@
 
     const states = $derived(editor.machine.states);
     const byId = $derived(new Map(states.map((state) => [state.id, state])));
-    const groups = $derived(groupEdges(editor.machine.transitions));
-    const keys = $derived(new Set(groups.map((group) => group.key)));
-    const loops = $derived(loopDirections(states, editor.machine.transitions));
+    const router = $derived(new EdgeRouter(states, editor.machine.transitions));
 
     const preview = $derived.by(() => {
         if (interaction?.kind === "connect") {
-            const from = byId.get(interaction.from)!;
-            const to = interaction.target ? byId.get(interaction.target)! : null;
-            if (to) {
-                return edgeShape(from, to, edgeBend(from, to, keys.has(`${to.id}>${from.id}`), states)).path;
+            if (interaction.target) {
+                return router.shape(interaction.from, interaction.target)?.path ?? null;
             }
+            const from = byId.get(interaction.from)!;
             return `M ${from.x} ${from.y} L ${interaction.pointer.x} ${interaction.pointer.y}`;
         }
-        if (inline?.kind === "edge" && !keys.has(`${inline.from}>${inline.to}`)) {
-            return shapeOf(inline.from, inline.to)?.path ?? null;
+        if (inline?.kind === "edge" && !router.hasEdge(inline.from, inline.to)) {
+            return router.shape(inline.from, inline.to)?.path ?? null;
         }
         return null;
     });
 
     const inlinePosition = $derived.by(() => {
         if (inline?.kind === "edge") {
-            const shape = shapeOf(inline.from, inline.to);
-            return shape ? toScreen({ x: shape.labelX, y: shape.labelY - 5 }) : null;
+            const shape = router.shape(inline.from, inline.to);
+            return shape ? view.toScreen({ x: shape.labelX, y: shape.labelY - 5 }) : null;
         }
         if (inline?.kind === "rename") {
             const state = byId.get(inline.id);
-            return state ? toScreen(state) : null;
+            return state ? view.toScreen(state) : null;
         }
         return null;
     });
@@ -82,19 +80,13 @@
         }
     });
 
-    function shapeOf(from: string, to: string) {
-        const a = byId.get(from);
-        const b = byId.get(to);
-        return a && b ? edgeShape(a, b, edgeBend(a, b, from !== to && keys.has(`${to}>${from}`), states), loops.get(from)) : null;
+    function toLocal(event: { clientX: number; clientY: number }): Point {
+        const rect = svg!.getBoundingClientRect();
+        return { x: event.clientX - rect.left, y: event.clientY - rect.top };
     }
 
     function toWorld(event: { clientX: number; clientY: number }): Point {
-        const rect = svg!.getBoundingClientRect();
-        return { x: (event.clientX - rect.left - view.x) / view.scale, y: (event.clientY - rect.top - view.y) / view.scale };
-    }
-
-    function toScreen(point: Point): Point {
-        return { x: point.x * view.scale + view.x, y: point.y * view.scale + view.y };
+        return view.toWorld(toLocal(event));
     }
 
     function hitState(point: Point): string | null {
@@ -113,20 +105,12 @@
 
     /** Centers and scales the view so that the whole graph is visible. */
     export function fit(): void {
-        const box = graphBounds(states, loops, 32);
-        const scale = Math.min(1.25, Math.max(0.3, Math.min(width / box.width, height / box.height)));
-        view = { scale, x: width / 2 - (box.x + box.width / 2) * scale, y: height / 2 - (box.y + box.height / 2) * scale };
+        view.fit(graphBounds(states, router.loops, 32), width, height);
     }
 
-    /**
-     * Zooms the view around an anchor point.
-     * @param factor multiplicative zoom, > 1 zooms in
-     * @param anchor screen point that stays fixed, the center by default
-     */
+    /** Zooms by a factor (> 1 zooms in) around a canvas point, the center by default. */
     export function zoom(factor: number, anchor: Point = { x: width / 2, y: height / 2 }): void {
-        const scale = Math.min(3, Math.max(0.25, view.scale * factor));
-        const applied = scale / view.scale;
-        view = { scale, x: anchor.x - (anchor.x - view.x) * applied, y: anchor.y - (anchor.y - view.y) * applied };
+        view.zoom(factor, anchor);
     }
 
     /** Arranges all states automatically and fits the view to the result. */
@@ -316,20 +300,19 @@
         const point = toWorld(event);
         const state = hitState(point);
         const edge = state ? null : hitEdge(event);
-        const rect = svg!.getBoundingClientRect();
+        const local = toLocal(event);
         const target: MenuTarget = state ? { kind: "state", id: state } : edge ? { kind: "edge", ...edge } : { kind: "canvas", point };
         if (target.kind === "state") {
             editor.selection = { kind: "state", id: target.id };
         } else if (target.kind === "edge") {
             editor.selection = target;
         }
-        menu = { x: Math.min(event.clientX - rect.left, width - 210), y: Math.min(event.clientY - rect.top, height - 200), target };
+        menu = { x: Math.min(local.x, width - 210), y: Math.min(local.y, height - 200), target };
     }
 
     function onWheel(event: WheelEvent) {
         event.preventDefault();
-        const rect = svg!.getBoundingClientRect();
-        zoom(Math.exp(-event.deltaY * 0.0015), { x: event.clientX - rect.left, y: event.clientY - rect.top });
+        zoom(Math.exp(-event.deltaY * 0.0015), toLocal(event));
     }
 
     function run(action: () => void) {
@@ -372,8 +355,8 @@
         </defs>
 
         <g transform="translate({view.x} {view.y}) scale({view.scale})">
-            {#each groups as group (group.key)}
-                {@const shape = shapeOf(group.from, group.to)}
+            {#each router.groups as group (group.key)}
+                {@const shape = router.shape(group.from, group.to)}
                 {#if shape}
                     {@const highlighted = isSelectedEdge(group.from, group.to) || activeEdges.has(group.key)}
                     <g class="edge" class:selected={isSelectedEdge(group.from, group.to)} class:active={activeEdges.has(group.key)} data-from={group.from} data-to={group.to}>

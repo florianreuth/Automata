@@ -3,11 +3,7 @@
 //
 // Copyright (c) 2026 Florian Reuth <git@florianreuth.de>
 
-/**
- * Prefixes an app-internal path with the configured base, so the site works when hosted in a subfolder.
- * @param path absolute path inside the app, e.g. "/endlicher-automat"
- * @return the path including the base, e.g. "/automata/endlicher-automat"
- */
+/** Prefixes an app-internal path such as "/endlicher-automat" with the configured base, so subfolder hosting works. */
 export function withBase(path: string): string {
     const base = import.meta.env.BASE_URL.replace(/\/$/, "");
     return `${base}/${path.replace(/^\//, "")}`;

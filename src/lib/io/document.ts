@@ -8,19 +8,13 @@ import type { FiniteAutomaton } from "../automata/fa/model.ts";
 const FORMAT = "automata";
 const VERSION = 1;
 
-/**
- * Serializes an automaton into the native JSON document format.
- * @param fa the automaton
- * @return pretty printed JSON
- */
+/** Serializes an automaton into the native JSON document format. */
 export function faToJson(fa: FiniteAutomaton): string {
     return JSON.stringify({ format: FORMAT, version: VERSION, machine: fa }, null, 2);
 }
 
 /**
  * Parses and validates a native JSON document.
- * @param json file contents
- * @return the automaton
  * @throws Error with a German message if the document is invalid
  */
 export function faFromJson(json: string): FiniteAutomaton {

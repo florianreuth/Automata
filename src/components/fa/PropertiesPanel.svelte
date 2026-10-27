@@ -7,7 +7,7 @@
 
 <script lang="ts">
     import { naturalCompare } from "../../lib/automata/machine.ts";
-    import { alphabetOf, type FiniteAutomaton, isComplete, isDeterministic } from "../../lib/automata/fa/model.ts";
+    import { alphabetOf, type FiniteAutomaton, isComplete, isDeterministic, unreachableStates } from "../../lib/automata/fa/model.ts";
 
     interface Props {
         fa: FiniteAutomaton;
@@ -23,23 +23,7 @@
     const initial = $derived(fa.states.find((state) => state.initial));
     const finals = $derived(fa.states.filter((state) => state.final).map((state) => state.name).sort(naturalCompare));
 
-    const unreachable = $derived.by(() => {
-        if (!initial) {
-            return [];
-        }
-        const reached = new Set([initial.id]);
-        const stack = [initial.id];
-        while (stack.length > 0) {
-            const current = stack.pop()!;
-            for (const t of fa.transitions) {
-                if (t.from === current && !reached.has(t.to)) {
-                    reached.add(t.to);
-                    stack.push(t.to);
-                }
-            }
-        }
-        return fa.states.filter((state) => !reached.has(state.id)).map((state) => state.name).sort(naturalCompare);
-    });
+    const unreachable = $derived(unreachableStates(fa).map((state) => state.name).sort(naturalCompare));
 
     const typeLabel = $derived(
         deterministic

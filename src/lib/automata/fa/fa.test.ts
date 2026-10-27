@@ -9,8 +9,8 @@ import { toDfa } from "./convert.ts";
 import { definitionToLatex, definitionToText, formalDefinition, transitionSignature } from "./definition.ts";
 import { faExamples } from "./examples.ts";
 import { layeredLayout } from "../../graph/layout.ts";
-import { isComplete, isDeterministic, parseSymbols } from "./model.ts";
-import { missingTransitions, simulate } from "./simulate.ts";
+import { isComplete, isDeterministic, parseSymbols, unreachableStates } from "./model.ts";
+import { missingTransitions, simulate, stepTransitions } from "./simulate.ts";
 
 const example = (id: string) => faExamples.find((e) => e.id === id)!.create();
 
@@ -38,6 +38,26 @@ describe("simulate", () => {
         assert.equal(simulate(fa, "aabbb").accepted, true);
         assert.equal(simulate(fa, "aba").accepted, false);
         assert.deepEqual(simulate(fa, "c").unknownSymbols, ["c"]);
+    });
+});
+
+describe("stepTransitions", () => {
+    it("lists the symbol moves into a step and the ε-moves inside it", () => {
+        const fa = example("epsilon-ab");
+        const result = simulate(fa, "ab");
+        const used = (step: number) => stepTransitions(fa, result, step).map((t) => t.symbol || "ε").sort();
+        assert.deepEqual(used(0), ["ε"]);
+        assert.deepEqual(used(1), ["a", "ε"]);
+        assert.deepEqual(used(2), ["b"]);
+    });
+});
+
+describe("unreachableStates", () => {
+    it("finds states without a path from the initial state", () => {
+        const fa = example("ends-with-01");
+        assert.deepEqual(unreachableStates(fa), []);
+        fa.transitions = fa.transitions.filter((t) => t.symbol !== "0" || t.from === t.to);
+        assert.deepEqual(unreachableStates(fa).map((state) => state.name), ["q1", "q2"]);
     });
 });
 

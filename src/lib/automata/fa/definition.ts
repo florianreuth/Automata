@@ -29,12 +29,7 @@ export interface FormalDefinition {
     rows: TransitionRow[];
 }
 
-/**
- * Derives the formal definition from an automaton.
- * @param fa the automaton
- * @param name identifier of the automaton, usually "A"
- * @return the definition with states sorted by name
- */
+/** Derives the formal definition from an automaton, with states sorted by name. */
 export function formalDefinition(fa: FiniteAutomaton, name = "A"): FormalDefinition {
     const names = new Map(fa.states.map((state) => [state.id, state.name]));
     const states = [...fa.states].sort((a, b) => naturalCompare(a.name, b.name));
@@ -61,11 +56,7 @@ export function formalDefinition(fa: FiniteAutomaton, name = "A"): FormalDefinit
     };
 }
 
-/**
- * Formats the signature of δ, depending on determinism and ε-transitions.
- * @param definition the definition
- * @return e.g. "δ: Q × Σ → 𝒫(Q)"
- */
+/** Formats the signature of δ depending on determinism and ε-transitions, e.g. "δ: Q × Σ → 𝒫(Q)". */
 export function transitionSignature(definition: FormalDefinition): string {
     if (definition.deterministic) {
         return "δ: Q × Σ → Q";
@@ -74,12 +65,7 @@ export function transitionSignature(definition: FormalDefinition): string {
     return `δ: ${domain} → 𝒫(Q)`;
 }
 
-/**
- * Formats one table cell; a DFA shows a single state, an NFA a set.
- * @param definition the definition
- * @param targets successor names
- * @return e.g. "q1", "{q1, q2}", "∅" or "–"
- */
+/** Formats one table cell: a DFA shows a single state or "–", an NFA a set or "∅". */
 export function formatCell(definition: FormalDefinition, targets: readonly string[]): string {
     if (definition.deterministic) {
         return targets[0] ?? "–";
@@ -87,11 +73,7 @@ export function formatCell(definition: FormalDefinition, targets: readonly strin
     return targets.length === 0 ? "∅" : `{${targets.join(", ")}}`;
 }
 
-/**
- * Renders the definition as plain Unicode text with an aligned table.
- * @param definition the definition
- * @return multi-line text
- */
+/** Renders the definition as plain Unicode text with an aligned table. */
 export function definitionToText(definition: FormalDefinition): string {
     const lines: string[] = [];
     if (definition.title.trim()) {
@@ -111,11 +93,7 @@ export function definitionToText(definition: FormalDefinition): string {
     return lines.join("\n");
 }
 
-/**
- * Renders the definition as GitHub flavored Markdown.
- * @param definition the definition
- * @return Markdown source
- */
+/** Renders the definition as GitHub flavored Markdown. */
 export function definitionToMarkdown(definition: FormalDefinition): string {
     const escape = (text: string) => text.replace(/([\\|*_`[\]])/g, "\\$1");
     const lines: string[] = [];
@@ -134,11 +112,7 @@ export function definitionToMarkdown(definition: FormalDefinition): string {
     return lines.join("\n");
 }
 
-/**
- * Renders the definition as a LaTeX fragment that compiles without extra packages.
- * @param definition the definition
- * @return LaTeX source
- */
+/** Renders the definition as a LaTeX fragment that compiles without extra packages. */
 export function definitionToLatex(definition: FormalDefinition): string {
     const set = (items: readonly string[], format: (item: string) => string) => (items.length === 0 ? "\\emptyset" : `\\{${items.map(format).join(", ")}\\}`);
     const cell = (targets: readonly string[]) => {

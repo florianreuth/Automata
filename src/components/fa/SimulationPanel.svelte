@@ -7,8 +7,9 @@
 
 <script lang="ts">
     import { displaySymbol, type FiniteAutomaton } from "../../lib/automata/fa/model.ts";
-    import { missingTransitions, move, simulate } from "../../lib/automata/fa/simulate.ts";
+    import { missingTransitions, simulate, stepTransitions } from "../../lib/automata/fa/simulate.ts";
     import { naturalCompare } from "../../lib/automata/machine.ts";
+    import { edgeKey } from "../../lib/graph/geometry.ts";
 
     interface Props {
         fa: FiniteAutomaton;
@@ -45,22 +46,7 @@
             onhighlight(null);
             return;
         }
-        const edges = new Set<string>();
-        if (step > 0) {
-            const previous = result.steps[step - 1].states;
-            const symbol = result.input[step - 1];
-            const moved = move(fa, previous, symbol);
-            for (const t of fa.transitions) {
-                if (t.symbol === symbol && previous.has(t.from) && moved.has(t.to)) {
-                    edges.add(`${t.from}>${t.to}`);
-                }
-            }
-        }
-        for (const t of fa.transitions) {
-            if (t.symbol === "" && current.states.has(t.from) && current.states.has(t.to)) {
-                edges.add(`${t.from}>${t.to}`);
-            }
-        }
+        const edges = new Set(stepTransitions(fa, result, step).map((t) => edgeKey(t.from, t.to)));
         onhighlight({ states: current.states, edges });
     });
 

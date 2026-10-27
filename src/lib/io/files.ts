@@ -3,12 +3,7 @@
 //
 // Copyright (c) 2026 Florian Reuth <git@florianreuth.de>
 
-/**
- * Offers a file for download in the browser.
- * @param name suggested file name
- * @param content file content
- * @param type MIME type
- */
+/** Offers a file for download in the browser. */
 export function downloadFile(name: string, content: BlobPart, type: string): void {
     const url = URL.createObjectURL(new Blob([content], { type }));
     const link = document.createElement("a");
@@ -18,11 +13,7 @@ export function downloadFile(name: string, content: BlobPart, type: string): voi
     setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-/**
- * Lets the user pick a local file and reads it as text.
- * @param accept file input accept attribute, e.g. ".json,.jff"
- * @return name and content, or null if the dialog was cancelled
- */
+/** Lets the user pick a local file and reads it as text; resolves to null if the dialog was cancelled. */
 export function pickTextFile(accept: string): Promise<{ name: string; text: string } | null> {
     return new Promise((resolve) => {
         const input = document.createElement("input");
@@ -37,12 +28,7 @@ export function pickTextFile(accept: string): Promise<{ name: string; text: stri
     });
 }
 
-/**
- * Rasterizes an SVG document into a PNG image.
- * @param svg standalone SVG markup with width and height attributes
- * @param scale pixel density multiplier
- * @return the PNG data
- */
+/** Rasterizes standalone SVG markup with width and height attributes into a PNG; scale is the pixel density. */
 export async function svgToPng(svg: string, scale = 2): Promise<Blob> {
     const image = new Image();
     image.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
@@ -56,11 +42,7 @@ export async function svgToPng(svg: string, scale = 2): Promise<Blob> {
     return new Promise((resolve, reject) => canvas.toBlob((blob) => (blob ? resolve(blob) : reject(new Error("PNG-Export fehlgeschlagen."))), "image/png"));
 }
 
-/**
- * Turns a document title into a safe file name.
- * @param title the title
- * @return a lowercase name without special characters, "automat" if empty
- */
+/** Turns a document title into a safe lowercase file name, "automat" if nothing remains. */
 export function fileBaseName(title: string): string {
     const base = title
         .toLowerCase()
