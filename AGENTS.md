@@ -1,7 +1,7 @@
 # AGENTS.md
 
-Guidelines for coding agents (and humans) working on Automata. Features, project structure and how to add a new machine
-type are described in the [README](README.md).
+Guidelines for coding agents (and humans) working on Automata. Features and commands are described in the
+[README](README.md).
 
 ## Stack
 
@@ -48,3 +48,5 @@ type are described in the [README](README.md).
 - Every source file starts with the MIT license header used in the existing files.
 - 4-space indentation (2 for JSON/YAML), double quotes, trailing commas, LF line endings.
 - Keep diffs focused: no unrelated reformatting or drive-by refactors.
+- A new machine type adds a model under `src/lib/automata/<type>/`, an editor implementing `GraphEditor`, a workbench
+  component and a route, then sets `href` for the module in `src/lib/modules.ts`.
