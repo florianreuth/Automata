@@ -20,10 +20,10 @@
 <figure class="tree">
     <svg viewBox="0 0 {layout.width} {layout.height}" width={layout.width} height={layout.height} role="img" aria-label="Ableitungsbaum">
         {#each layout.edges as edge, i (i)}
-            <line x1={edge.x1} y1={edge.y1 + 8} x2={edge.x2} y2={edge.y2 - 12}/>
+            <line x1={edge.x1} y1={edge.y1} x2={edge.x2} y2={edge.y2}/>
         {/each}
         {#each layout.nodes as node, i (i)}
-            <text x={node.x} y={node.y + 5} class:leaf={node.leaf}>{node.label}</text>
+            <text x={node.x} y={node.y} class:leaf={node.leaf}>{node.label}</text>
         {/each}
     </svg>
 </figure>

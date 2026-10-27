@@ -7,8 +7,8 @@
 
 <script lang="ts">
     import { displaySymbol, type FiniteAutomaton } from "../../lib/automata/fa/model.ts";
-    import { missingTransitions, simulate, stepTransitions } from "../../lib/automata/fa/simulate.ts";
-    import { naturalCompare } from "../../lib/automata/machine.ts";
+    import { blockedStep, missingTransitions, simulate, stepTransitions } from "../../lib/automata/fa/simulate.ts";
+    import { formatSet, naturalCompare } from "../../lib/automata/machine.ts";
     import { edgeKey } from "../../lib/graph/geometry.ts";
     import { tooltip } from "../../lib/ui/tooltip.ts";
 
@@ -33,13 +33,9 @@
     const hasInitial = $derived(fa.states.some((state) => state.initial));
     const missing = $derived(missingTransitions(fa));
     const blocked = $derived.by(() => {
-        // Once the set of active states is empty it stays empty, so the first empty step is where the run got stuck.
-        const index = result.steps.findIndex((s, i) => i > 0 && s.states.size === 0 && result.steps[i - 1].states.size > 0);
-        if (index < 0) {
-            return null;
-        }
-        const from = sortedStates(result.steps[index - 1].states).map((state) => state.name);
-        return { position: index, symbol: result.input[index - 1], from: from.length === 1 ? from[0] : `{${from.join(", ")}}` };
+        const found = blockedStep(result);
+        const from = found ? sortedStates(found.from).map((state) => state.name) : [];
+        return found && { ...found, from: from.length === 1 ? from[0] : formatSet(from) };
     });
 
     $effect(() => {

@@ -29,6 +29,8 @@
     import SimulationPanel from "./SimulationPanel.svelte";
 
     const AUTOSAVE_KEY = "automata:fa:autosave";
+    const ZOOM_STEP = 1.2;
+    const TOAST_DURATION_MS = 3200;
 
     const editor = new FaEditor(loadAutosave(AUTOSAVE_KEY, faFromJson) ?? faExamples[0].create());
 
@@ -90,7 +92,7 @@
     function notify(message: string) {
         const id = Date.now();
         toast = { message, id };
-        setTimeout(() => toast?.id === id && (toast = null), 3200);
+        setTimeout(() => toast?.id === id && (toast = null), TOAST_DURATION_MS);
     }
 
     async function load(fa: FiniteAutomaton) {
@@ -222,10 +224,10 @@
                 </button>
             {/each}
             <span class="divider"></span>
-            <button class="icon-button" onclick={() => canvas?.zoom(1.2)} aria-label="Vergrößern" {@attach tooltip("Vergrößern", "right")}>
+            <button class="icon-button" onclick={() => canvas?.zoom(ZOOM_STEP)} aria-label="Vergrößern" {@attach tooltip("Vergrößern", "right")}>
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5a6 6 0 1 0 0 12 6 6 0 0 0 0-12zm9 15-4.7-4.7M11 8v6m-3-3h6"/></svg>
             </button>
-            <button class="icon-button" onclick={() => canvas?.zoom(1 / 1.2)} aria-label="Verkleinern" {@attach tooltip("Verkleinern", "right")}>
+            <button class="icon-button" onclick={() => canvas?.zoom(1 / ZOOM_STEP)} aria-label="Verkleinern" {@attach tooltip("Verkleinern", "right")}>
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5a6 6 0 1 0 0 12 6 6 0 0 0 0-12zm9 15-4.7-4.7M8 11h6"/></svg>
             </button>
             <button class="icon-button" onclick={() => canvas?.fit()} aria-label="Ansicht anpassen" {@attach tooltip("Ansicht anpassen (F)", "right")}>

@@ -6,7 +6,6 @@
 import { EPSILON, formatSet, naturalCompare } from "../machine.ts";
 import { alphabetOf, displaySymbol, type FiniteAutomaton, isDeterministic } from "./model.ts";
 
-/** One row of the transition table. */
 export interface TransitionRow {
     state: string;
     initial: boolean;

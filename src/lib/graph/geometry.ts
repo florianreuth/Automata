@@ -6,6 +6,10 @@
 import type { Edge, StateNode } from "../automata/machine.ts";
 
 export const STATE_RADIUS = 26;
+/** Vertical offset from a state center to the baseline of its name, which centers 15px text. */
+export const NAME_BASELINE = 5;
+/** Vertical offset from a state center to the baseline of its secondary label below the circle. */
+export const LABEL_BASELINE = STATE_RADIUS + 18;
 const LOOP_HEIGHT = 58;
 const BEND = 26;
 const OBSTACLE_BEND = 44;

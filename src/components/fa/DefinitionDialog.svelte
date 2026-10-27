@@ -18,8 +18,7 @@
     import { formatSet } from "../../lib/automata/machine.ts";
     import type { FaEditor } from "../../lib/editor/fa-editor.svelte.ts";
     import { renderMachineSvg } from "../../lib/graph/svg.ts";
-    import { downloadDocument, svgToPng } from "../../lib/io/files.ts";
-    import { escapeMarkup } from "../../lib/markup.ts";
+    import { downloadDocument, printHtml, svgToPng } from "../../lib/io/files.ts";
     import { tooltip } from "../../lib/ui/tooltip.ts";
 
     interface Props {
@@ -39,7 +38,6 @@
     const showTable = $derived(representation !== "graph");
     const showGraph = $derived(representation !== "table");
 
-    /** Opens the dialog as a modal. */
     export function open(): void {
         dialog?.showModal();
     }
@@ -59,21 +57,6 @@
         } catch {
             onnotify("Der PNG-Export ist fehlgeschlagen.");
         }
-    }
-
-    function print() {
-        // Printing from an isolated frame avoids fighting the app layout and the dialog top layer with print CSS.
-        const frame = document.createElement("iframe");
-        frame.style.position = "fixed";
-        frame.style.width = "0";
-        frame.style.height = "0";
-        frame.style.border = "0";
-        frame.srcdoc = `<!doctype html><html lang="de"><head><meta charset="utf-8"><title>${escapeMarkup(editor.machine.title)}</title><style>${PRINT_CSS}</style></head><body>${sheet?.innerHTML ?? ""}</body></html>`;
-        frame.addEventListener("load", () => {
-            frame.contentWindow?.print();
-            setTimeout(() => frame.remove(), 1000);
-        });
-        document.body.append(frame);
     }
 
     const PRINT_CSS = `
@@ -181,7 +164,7 @@
         <span class="spacer"></span>
         <button class="button" onclick={() => downloadDocument(editor.machine.title, "svg", svg)}>SVG</button>
         <button class="button" onclick={downloadPng}>PNG</button>
-        <button class="button primary" onclick={print}>Drucken / PDF</button>
+        <button class="button primary" onclick={() => printHtml(editor.machine.title, sheet?.innerHTML ?? "", PRINT_CSS)}>Drucken / PDF</button>
     </footer>
 </dialog>
 

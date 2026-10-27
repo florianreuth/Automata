@@ -10,7 +10,6 @@ export interface FaTransition extends Edge {
     symbol: string;
 }
 
-/** A (non)deterministic finite automaton. */
 export interface FiniteAutomaton extends Machine<FaTransition> {
     kind: "fa";
 }

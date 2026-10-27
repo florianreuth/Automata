@@ -5,7 +5,7 @@
 
 import type { Edge, Machine } from "../automata/machine.ts";
 import { escapeMarkup } from "../markup.ts";
-import { type EdgeGroup, EdgeRouter, graphBounds, initialArrowPath, STATE_RADIUS } from "./geometry.ts";
+import { type EdgeGroup, EdgeRouter, graphBounds, initialArrowPath, LABEL_BASELINE, NAME_BASELINE, STATE_RADIUS } from "./geometry.ts";
 
 const INK = "#1a1b2e";
 const MUTED = "#5f6178";
@@ -41,9 +41,9 @@ export function renderMachineSvg<T extends Edge>(machine: Machine<T>, edgeLabel:
         if (state.final) {
             parts.push(`<circle cx="${state.x}" cy="${state.y}" r="${STATE_RADIUS - 5}" fill="none" stroke="${INK}" stroke-width="1.4"/>`);
         }
-        parts.push(`<text x="${state.x}" y="${state.y + 5}" text-anchor="middle" font-size="15" fill="${INK}">${escapeMarkup(state.name)}</text>`);
+        parts.push(`<text x="${state.x}" y="${state.y + NAME_BASELINE}" text-anchor="middle" font-size="15" fill="${INK}">${escapeMarkup(state.name)}</text>`);
         if (state.label) {
-            parts.push(`<text x="${state.x}" y="${state.y + STATE_RADIUS + 18}" text-anchor="middle" font-size="12" fill="${MUTED}">${escapeMarkup(state.label)}</text>`);
+            parts.push(`<text x="${state.x}" y="${state.y + LABEL_BASELINE}" text-anchor="middle" font-size="12" fill="${MUTED}">${escapeMarkup(state.label)}</text>`);
         }
     }
     parts.push("</svg>");

@@ -70,6 +70,13 @@ export function simulate(fa: FiniteAutomaton, word: string): SimulationResult {
     };
 }
 
+/** Where a run dies: the step without active states, the symbol read there and the states it was read in; null if it never dies. */
+export function blockedStep(result: SimulationResult): { position: number; symbol: string; from: ReadonlySet<string> } | null {
+    // Once the set of active states is empty it stays empty, so the first empty step is where the run got stuck.
+    const position = result.steps.findIndex((step, i) => i > 0 && step.states.size === 0 && result.steps[i - 1].states.size > 0);
+    return position < 0 ? null : { position, symbol: result.input[position - 1], from: result.steps[position - 1].states };
+}
+
 /**
  * Transitions taken to reach a step: the symbol moves from the previous step plus the ε-moves inside its closure.
  * @param step index into {@link SimulationResult.steps}, clamped to the last step

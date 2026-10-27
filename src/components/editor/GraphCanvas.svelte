@@ -10,7 +10,15 @@
     import type { Edge, Machine } from "../../lib/automata/machine.ts";
     import type { GraphEditor } from "../../lib/editor/graph-editor.ts";
     import { Viewport } from "../../lib/editor/viewport.svelte.ts";
-    import { EdgeRouter, graphBounds, initialArrowPath, type Point, STATE_RADIUS } from "../../lib/graph/geometry.ts";
+    import { EdgeRouter, graphBounds, initialArrowPath, LABEL_BASELINE, NAME_BASELINE, type Point, STATE_RADIUS } from "../../lib/graph/geometry.ts";
+
+    const GRID_SIZE = 24;
+    const SNAP = 10;
+    const FIT_MARGIN = 32;
+    const WHEEL_ZOOM_SPEED = 0.0015;
+    // Upper bounds of the context menu size, so it opens inwards near the right and bottom edge.
+    const MENU_WIDTH = 210;
+    const MENU_HEIGHT = 200;
 
     interface Props {
         editor: GraphEditor<T>;
@@ -105,7 +113,7 @@
 
     /** Centers and scales the view so that the whole graph is visible. */
     export function fit(): void {
-        view.fit(graphBounds(states, router.loops, 32), width, height);
+        view.fit(graphBounds(states, router.loops, FIT_MARGIN), width, height);
     }
 
     /** Zooms by a factor (> 1 zooms in) around a canvas point, the center by default. */
@@ -260,7 +268,7 @@
         if (interaction.kind === "drag") {
             interaction.moved = true;
             // Holding Alt disables snapping for fine positioning.
-            const snap = event.altKey ? 1 : 10;
+            const snap = event.altKey ? 1 : SNAP;
             editor.moveState(interaction.id, Math.round((point.x - interaction.dx) / snap) * snap, Math.round((point.y - interaction.dy) / snap) * snap);
         } else {
             interaction.pointer = point;
@@ -307,12 +315,12 @@
         } else if (target.kind === "edge") {
             editor.selection = target;
         }
-        menu = { x: Math.min(local.x, width - 210), y: Math.min(local.y, height - 200), target };
+        menu = { x: Math.min(local.x, width - MENU_WIDTH), y: Math.min(local.y, height - MENU_HEIGHT), target };
     }
 
     function onWheel(event: WheelEvent) {
         event.preventDefault();
-        zoom(Math.exp(-event.deltaY * 0.0015), toLocal(event));
+        zoom(Math.exp(-event.deltaY * WHEEL_ZOOM_SPEED), toLocal(event));
     }
 
     function run(action: () => void) {
@@ -331,7 +339,7 @@
     bind:clientWidth={width}
     bind:clientHeight={height}
     style:background-position="{view.x}px {view.y}px"
-    style:background-size="{24 * view.scale}px {24 * view.scale}px"
+    style:background-size="{GRID_SIZE * view.scale}px {GRID_SIZE * view.scale}px"
 >
     <svg
         bind:this={svg}
@@ -388,10 +396,10 @@
                         <circle class="ring" cx={state.x} cy={state.y} r={STATE_RADIUS - 5}/>
                     {/if}
                     {#if !(inline?.kind === "rename" && inline.id === state.id)}
-                        <text class="name" x={state.x} y={state.y + 5}>{state.name}</text>
+                        <text class="name" x={state.x} y={state.y + NAME_BASELINE}>{state.name}</text>
                     {/if}
                     {#if state.label}
-                        <text class="label" x={state.x} y={state.y + STATE_RADIUS + 18}>{state.label}</text>
+                        <text class="label" x={state.x} y={state.y + LABEL_BASELINE}>{state.label}</text>
                     {/if}
                 </g>
             {/each}

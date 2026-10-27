@@ -152,6 +152,7 @@
 
     .diagram :global(svg) {
         display: block;
-        max-width: none;
+        max-width: 100%;
+        height: auto;
     }
 </style>

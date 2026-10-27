@@ -3,6 +3,8 @@
 A modern, browser-based workbench for formal languages and automata theory, inspired by [JFLAP](https://www.jflap.org).
 Built with [Astro](https://astro.build), [Svelte](https://svelte.dev) and TypeScript. The user interface is in German.
 
+![Start page](docs/screenshots/home.png)
+
 ## Features
 
 **Finite automata** (NFA/DFA) with ε-transitions:
@@ -13,19 +15,16 @@ Built with [Astro](https://astro.build), [Svelte](https://svelte.dev) and TypeSc
 - Formal definition `A = (Q, Σ, δ, q0, F)`, exportable as text, Markdown, LaTeX, SVG, PNG and PDF
 - JSON documents and JFLAP `.jff` import/export
 
-**Regular expressions**:
+![Finite automaton editor](docs/screenshots/finite-automaton.png)
 
-- `|`, `*`, `+`, `?` and parentheses; `\` escapes an operator, an empty alternative like `(a|)` means ε
-- Batch testing and ε-NFA via Thompson construction, which opens in the automaton editor
+**Regular expressions**: batch testing and conversion to an ε-NFA (Thompson construction).
 
-**Grammars**:
+![Regular expressions](docs/screenshots/regular-expression.png)
 
-- One production per line, e.g. `S -> aSb |`; `->` becomes `→` while typing, an empty alternative means ε
-- Uppercase letters (also `S'`, `A1`) are nonterminals, every other character is a terminal
-- Chomsky classification, Chomsky normal form and CYK table
-- FIRST/FOLLOW sets, LL(1) table with conflicts, step-by-step LL(1) parsing and derivation tree
+**Grammars**: Chomsky classification, Chomsky normal form, CYK, FIRST/FOLLOW sets and LL(1) parsing with derivation
+tree. Type `->` for `→`; an empty alternative means ε.
 
-Special characters such as `→`, `ε` and `∅` can also be inserted with the buttons below each input.
+![Grammars and parsing](docs/screenshots/grammar.png)
 
 Planned: minimal DFA, regular grammar ↔ FA, SLR(1) and brute-force parsing, pushdown automata, Turing machines and
 L-systems.

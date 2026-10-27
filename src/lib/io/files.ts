@@ -3,12 +3,18 @@
 //
 // Copyright (c) 2026 Florian Reuth <git@florianreuth.de>
 
+import { escapeMarkup } from "../markup.ts";
+
 const MIME_TYPES = {
     json: "application/json",
     jff: "application/xml",
     svg: "image/svg+xml",
     png: "image/png",
 } as const;
+const UMLAUTS: Record<string, string> = { ä: "ae", ö: "oe", ü: "ue", ß: "ss" };
+const MAX_NAME_LENGTH = 60;
+// Removing an object URL or frame right away would cancel the download or print the browser just started.
+const CLEANUP_DELAY_MS = 1000;
 
 /** Offers content for download, named after the document title with the given extension. */
 export function downloadDocument(title: string, extension: keyof typeof MIME_TYPES, content: BlobPart): void {
@@ -21,7 +27,19 @@ function downloadFile(name: string, content: BlobPart, type: string): void {
     link.href = url;
     link.download = name;
     link.click();
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    setTimeout(() => URL.revokeObjectURL(url), CLEANUP_DELAY_MS);
+}
+
+/** Prints a standalone HTML document from a hidden frame, so the styles of the app do not interfere. */
+export function printHtml(title: string, body: string, css: string): void {
+    const frame = document.createElement("iframe");
+    frame.style.cssText = "position: fixed; width: 0; height: 0; border: 0";
+    frame.srcdoc = `<!doctype html><html lang="de"><head><meta charset="utf-8"><title>${escapeMarkup(title)}</title><style>${css}</style></head><body>${body}</body></html>`;
+    frame.addEventListener("load", () => {
+        frame.contentWindow?.print();
+        setTimeout(() => frame.remove(), CLEANUP_DELAY_MS);
+    });
+    document.body.append(frame);
 }
 
 /** Lets the user pick a local file and reads it as text; resolves to null if the dialog was cancelled. */
@@ -57,11 +75,8 @@ export async function svgToPng(svg: string, scale = 2): Promise<Blob> {
 function fileBaseName(title: string): string {
     const base = title
         .toLowerCase()
-        .replace(/ä/g, "ae")
-        .replace(/ö/g, "oe")
-        .replace(/ü/g, "ue")
-        .replace(/ß/g, "ss")
+        .replace(/[äöüß]/g, (char) => UMLAUTS[char])
         .replace(/[^a-z0-9]+/g, "-")
         .replace(/^-+|-+$/g, "");
-    return base.slice(0, 60) || "automat";
+    return base.slice(0, MAX_NAME_LENGTH) || "automat";
 }

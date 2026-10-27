@@ -6,8 +6,8 @@
 
 import Footer from "../components/Footer.astro";
 import Base from "../layouts/Base.astro";
-import { modules } from "../lib/modules";
-import { withBase } from "../lib/paths";
+import { modules } from "../lib/modules.ts";
+import { withBase } from "../lib/paths.ts";
 
 const available = modules.filter((module) => module.href);
 ---

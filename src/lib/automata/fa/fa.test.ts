@@ -10,7 +10,7 @@ import { definitionToLatex, definitionToText, formalDefinition, transitionSignat
 import { faExamples } from "./examples.ts";
 import { layeredLayout } from "../../graph/layout.ts";
 import { isComplete, isDeterministic, parseSymbols, unreachableStates } from "./model.ts";
-import { missingTransitions, simulate, stepTransitions } from "./simulate.ts";
+import { blockedStep, missingTransitions, simulate, stepTransitions } from "./simulate.ts";
 
 const example = (id: string) => faExamples.find((e) => e.id === id)!.create();
 
@@ -101,6 +101,17 @@ describe("parseSymbols", () => {
         assert.deepEqual(parseSymbols("0, 1 ε"), { symbols: ["0", "1", ""] });
         assert.deepEqual(parseSymbols(""), { symbols: [""] });
         assert.ok("error" in parseSymbols("ab"));
+    });
+});
+
+describe("blockedStep", () => {
+    it("finds the symbol on which a run dies", () => {
+        const fa = example("epsilon-ab");
+        assert.equal(blockedStep(simulate(fa, "aabb")), null);
+        const blocked = blockedStep(simulate(fa, "aba"))!;
+        assert.equal(blocked.position, 3);
+        assert.equal(blocked.symbol, "a");
+        assert.deepEqual([...blocked.from].map((id) => fa.states.find((s) => s.id === id)!.name), ["q1"]);
     });
 });
 

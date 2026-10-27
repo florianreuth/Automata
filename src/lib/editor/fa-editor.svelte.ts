@@ -153,7 +153,6 @@ export class FaEditor implements GraphEditor<FaTransition> {
         this.#change(() => applyLayout(this.machine.states, this.machine.transitions));
     }
 
-    /** Removes whatever is selected. */
     deleteSelection(): void {
         const selection = this.selection;
         if (selection?.kind === "state") {
