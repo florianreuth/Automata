@@ -36,14 +36,16 @@ export const modules: Module[] = [
     {
         id: "grammar",
         title: "Grammatiken & Parsing",
-        description: "Reguläre, kontextfreie und unbeschränkte Grammatiken mit Brute-Force-, LL(1)-, SLR(1)- und CYK-Parsern.",
-        features: ["LL(1)", "SLR(1)", "CYK"],
+        description: "Grammatiken klassifizieren, kontextfreie in Chomsky-Normalform bringen und mit CYK- und LL(1)-Parser ableiten.",
+        href: "/grammatik",
+        features: ["Chomsky-Hierarchie", "Chomsky-Normalform", "CYK", "LL(1)", "Ableitungsbaum"],
     },
     {
         id: "regex",
         title: "Reguläre Ausdrücke",
-        description: "Umwandlungen zwischen regulären Ausdrücken, endlichen Automaten und regulären Grammatiken.",
-        features: ["RA → NEA", "DEA → RA", "DEA minimieren"],
+        description: "Reguläre Ausdrücke testen, in NEA umwandeln und aus endlichen Automaten zurückgewinnen.",
+        href: "/regulaerer-ausdruck",
+        features: ["RA → NEA (Thompson)", "EA → RA", "Mehrfachtest"],
     },
     {
         id: "lsystem",

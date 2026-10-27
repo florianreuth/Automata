@@ -3,8 +3,8 @@
 //
 // Copyright (c) 2026 Florian Reuth <git@florianreuth.de>
 
-import { layeredLayout } from "../../graph/layout.ts";
-import { createId, naturalCompare, type StateNode } from "../machine.ts";
+import { applyLayout } from "../../graph/layout.ts";
+import { createId, formatSet, naturalCompare, type StateNode } from "../machine.ts";
 import { alphabetOf, type FaTransition, type FiniteAutomaton, initialStateOf } from "./model.ts";
 import { epsilonClosure, move } from "./simulate.ts";
 
@@ -21,7 +21,8 @@ export function toDfa(fa: FiniteAutomaton): FiniteAutomaton {
     const alphabet = alphabetOf(fa);
     const names = new Map(fa.states.map((state) => [state.id, state.name]));
     const finals = new Set(fa.states.filter((state) => state.final).map((state) => state.id));
-    const keyOf = (set: ReadonlySet<string>) => [...set].map((id) => names.get(id)!).sort(naturalCompare).join(",");
+    const sortedNames = (set: ReadonlySet<string>) => [...set].map((id) => names.get(id)!).sort(naturalCompare);
+    const keyOf = (set: ReadonlySet<string>) => sortedNames(set).join(",");
 
     const subsets: Set<string>[] = [];
     const indexByKey = new Map<string, number>();
@@ -48,7 +49,7 @@ export function toDfa(fa: FiniteAutomaton): FiniteAutomaton {
     const states: StateNode[] = subsets.map((set, i) => ({
         id: createId(),
         name: `q${i}`,
-        label: set.size === 0 ? "∅" : `{${keyOf(set).split(",").join(", ")}}`,
+        label: formatSet(sortedNames(set)),
         x: 0,
         y: 0,
         initial: i === 0,
@@ -60,10 +61,7 @@ export function toDfa(fa: FiniteAutomaton): FiniteAutomaton {
         to: states[edge.to].id,
         symbol: edge.symbol,
     }));
-    const positions = layeredLayout(states, transitions);
-    for (const state of states) {
-        Object.assign(state, positions.get(state.id));
-    }
+    applyLayout(states, transitions);
     return { kind: "fa", title: `${fa.title} (DEA)`, states, transitions };
 }
 

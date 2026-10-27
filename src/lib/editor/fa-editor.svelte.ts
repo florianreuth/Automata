@@ -4,9 +4,9 @@
 // Copyright (c) 2026 Florian Reuth <git@florianreuth.de>
 
 import { createId, nextStateName } from "../automata/machine.ts";
-import { compareSymbols, createFiniteAutomaton, type FaTransition, type FiniteAutomaton, formatSymbols, parseSymbols } from "../automata/fa/model.ts";
+import { compareSymbols, createFiniteAutomaton, type FaTransition, type FiniteAutomaton, formatSymbols, parseSymbols, transitionLabel } from "../automata/fa/model.ts";
 import type { EdgeGroup } from "../graph/geometry.ts";
-import { layeredLayout } from "../graph/layout.ts";
+import { applyLayout } from "../graph/layout.ts";
 import type { GraphEditor, Selection, Tool } from "./graph-editor.ts";
 
 const HISTORY_LIMIT = 200;
@@ -150,12 +150,7 @@ export class FaEditor implements GraphEditor<FaTransition> {
     }
 
     arrange(): void {
-        const positions = layeredLayout(this.machine.states, this.machine.transitions);
-        this.#change(() => {
-            for (const state of this.machine.states) {
-                Object.assign(state, positions.get(state.id));
-            }
-        });
+        this.#change(() => applyLayout(this.machine.states, this.machine.transitions));
     }
 
     /** Removes whatever is selected. */
@@ -169,7 +164,7 @@ export class FaEditor implements GraphEditor<FaTransition> {
     }
 
     edgeLabel(group: EdgeGroup<FaTransition>): string {
-        return formatSymbols(group.transitions.map((t) => t.symbol));
+        return transitionLabel(group.transitions);
     }
 
     edgeText(from: string, to: string): string {

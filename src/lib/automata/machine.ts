@@ -43,6 +43,12 @@ export function naturalCompare(a: string, b: string): number {
     return a.localeCompare(b, "de", { numeric: true });
 }
 
+/** Formats a set such as "{a, b}", or ∅ if it is empty. */
+export function formatSet(items: Iterable<string>): string {
+    const list = [...items];
+    return list.length === 0 ? "∅" : `{${list.join(", ")}}`;
+}
+
 /** Proposes the lowest unused state name prefix + n. */
 export function nextStateName(states: readonly StateNode[], prefix = "q"): string {
     const used = new Set(states.map((state) => state.name));

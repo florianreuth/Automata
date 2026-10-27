@@ -3,7 +3,7 @@
 //
 // Copyright (c) 2026 Florian Reuth <git@florianreuth.de>
 
-import { EPSILON, naturalCompare } from "../machine.ts";
+import { EPSILON, formatSet, naturalCompare } from "../machine.ts";
 import { alphabetOf, displaySymbol, type FiniteAutomaton, isDeterministic } from "./model.ts";
 
 /** One row of the transition table. */
@@ -70,7 +70,7 @@ export function formatCell(definition: FormalDefinition, targets: readonly strin
     if (definition.deterministic) {
         return targets[0] ?? "–";
     }
-    return targets.length === 0 ? "∅" : `{${targets.join(", ")}}`;
+    return formatSet(targets);
 }
 
 /** Renders the definition as plain Unicode text with an aligned table. */
@@ -146,8 +146,7 @@ function tupleLine(definition: FormalDefinition): string {
 }
 
 function setsLine(definition: FormalDefinition): string {
-    const set = (items: readonly string[]) => (items.length === 0 ? "∅" : `{${items.join(", ")}}`);
-    return `Q = ${set(definition.states)}    Σ = ${set(definition.alphabet)}    F = ${set(definition.finals)}`;
+    return `Q = ${formatSet(definition.states)}    Σ = ${formatSet(definition.alphabet)}    F = ${formatSet(definition.finals)}`;
 }
 
 function rowLabel(row: TransitionRow): string {

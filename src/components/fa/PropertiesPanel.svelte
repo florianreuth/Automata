@@ -6,8 +6,11 @@
 -->
 
 <script lang="ts">
-    import { naturalCompare } from "../../lib/automata/machine.ts";
+    import { formatSet, naturalCompare } from "../../lib/automata/machine.ts";
     import { alphabetOf, type FiniteAutomaton, isComplete, isDeterministic, unreachableStates } from "../../lib/automata/fa/model.ts";
+    import { faToRegex } from "../../lib/automata/regex/convert.ts";
+    import { formatRegex } from "../../lib/automata/regex/regex.ts";
+    import { withBase } from "../../lib/paths.ts";
 
     interface Props {
         fa: FiniteAutomaton;
@@ -24,6 +27,10 @@
     const finals = $derived(fa.states.filter((state) => state.final).map((state) => state.name).sort(naturalCompare));
 
     const unreachable = $derived(unreachableStates(fa).map((state) => state.name).sort(naturalCompare));
+
+    // Elimination can grow exponentially, so it only runs (and then follows edits) once requested.
+    let showRegex = $state(false);
+    const regex = $derived(showRegex && initial ? formatRegex(faToRegex(fa)) : null);
 
     const typeLabel = $derived(
         deterministic
@@ -45,11 +52,11 @@
         <dt>Übergänge</dt>
         <dd>{fa.transitions.length}</dd>
         <dt>Alphabet Σ</dt>
-        <dd class="mono">{alphabet.length > 0 ? `{${alphabet.join(", ")}}` : "∅"}</dd>
+        <dd class="mono">{formatSet(alphabet)}</dd>
         <dt>Startzustand</dt>
         <dd class="mono">{initial?.name ?? "–"}</dd>
         <dt>Endzustände F</dt>
-        <dd class="mono">{finals.length > 0 ? `{${finals.join(", ")}}` : "∅"}</dd>
+        <dd class="mono">{formatSet(finals)}</dd>
     </dl>
 
     {#if fa.states.length > 0 && !initial}
@@ -65,24 +72,22 @@
     <h3>Umwandlungen</h3>
     <button class="button primary wide" onclick={onconvert} disabled={!initial}>NEA → DEA (Potenzmengenkonstruktion)</button>
     <p class="hint">Das Ergebnis ersetzt den aktuellen Automaten und lässt sich mit Strg+Z rückgängig machen.</p>
+    <button class="button wide" onclick={() => (showRegex = !showRegex)} disabled={!initial} aria-expanded={showRegex}>EA → RA (Zustandselimination)</button>
+    {#if regex !== null}
+        <p class="mono regex">{regex}</p>
+        <a class="button wide" href={withBase(`/regulaerer-ausdruck?ra=${encodeURIComponent(regex)}`)}>Im Modul „Reguläre Ausdrücke“ öffnen</a>
+    {/if}
 </section>
 
 <style>
     h3 {
         margin-top: 8px;
-        font-size: 0.8125rem;
-        font-weight: 600;
-        letter-spacing: 0.04em;
-        text-transform: uppercase;
-        color: var(--muted);
     }
 
-    .wide {
-        width: 100%;
-    }
-
-    .hint {
-        color: var(--muted);
-        font-size: 0.8125rem;
+    .regex {
+        padding: 8px 12px;
+        border-radius: 8px;
+        background: var(--hover);
+        overflow-wrap: anywhere;
     }
 </style>

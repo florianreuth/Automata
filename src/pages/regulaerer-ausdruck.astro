@@ -1,0 +1,13 @@
+---
+// This project is licensed under the MIT License.
+// See the LICENSE file in the project root for details.
+//
+// Copyright (c) 2026 Florian Reuth <git@florianreuth.de>
+
+import RegexWorkbench from "../components/regex/RegexWorkbench.svelte";
+import Editor from "../layouts/Editor.astro";
+---
+
+<Editor title="Reguläre Ausdrücke – Automata" description="Reguläre Ausdrücke testen, mit der Thompson-Konstruktion in NEA umwandeln und aus endlichen Automaten gewinnen.">
+    <RegexWorkbench client:only="svelte"/>
+</Editor>

@@ -5,19 +5,9 @@
 // Copyright (c) 2026 Florian Reuth <git@florianreuth.de>
 
 import FaWorkbench from "../components/fa/FaWorkbench.svelte";
-import Base from "../layouts/Base.astro";
+import Editor from "../layouts/Editor.astro";
 ---
 
-<Base title="Endlicher Automat – Automata" description="Nichtdeterministische endliche Automaten zeichnen, simulieren, in DEA umwandeln und formal beschreiben.">
+<Editor title="Endlicher Automat – Automata" description="Nichtdeterministische endliche Automaten zeichnen, simulieren, in DEA umwandeln und formal beschreiben.">
     <FaWorkbench client:only="svelte"/>
-    <noscript>
-        <p class="noscript">Der Editor benötigt JavaScript. Bitte aktiviere JavaScript in deinem Browser.</p>
-    </noscript>
-</Base>
-
-<style>
-    .noscript {
-        padding: 32px 16px;
-        text-align: center;
-    }
-</style>
+</Editor>

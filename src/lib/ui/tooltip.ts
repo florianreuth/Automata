@@ -62,21 +62,17 @@ export function tooltip(text: string, placement: Placement = "bottom"): Attachme
         const instance = (shared ??= new Tooltip());
         const show = () => instance.show(element, text, placement);
         const hide = () => instance.hide(element);
-        const onKeyDown = (event: KeyboardEvent) => event.key === "Escape" && hide();
-        element.addEventListener("pointerenter", show);
-        element.addEventListener("focusin", show);
-        element.addEventListener("pointerleave", hide);
-        element.addEventListener("focusout", hide);
-        element.addEventListener("pointerdown", hide);
-        element.addEventListener("keydown", onKeyDown);
+        const listeners = new AbortController();
+        const options = { signal: listeners.signal };
+        element.addEventListener("pointerenter", show, options);
+        element.addEventListener("focusin", show, options);
+        element.addEventListener("pointerleave", hide, options);
+        element.addEventListener("focusout", hide, options);
+        element.addEventListener("pointerdown", hide, options);
+        element.addEventListener("keydown", (event) => event.key === "Escape" && hide(), options);
         return () => {
             hide();
-            element.removeEventListener("pointerenter", show);
-            element.removeEventListener("focusin", show);
-            element.removeEventListener("pointerleave", hide);
-            element.removeEventListener("focusout", hide);
-            element.removeEventListener("pointerdown", hide);
-            element.removeEventListener("keydown", onKeyDown);
+            listeners.abort();
         };
     };
 }

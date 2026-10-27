@@ -96,6 +96,7 @@ body {
     font-size: 0.875rem;
     font-weight: 550;
     white-space: nowrap;
+    text-decoration: none;
     cursor: pointer;
     transition: background 0.15s, border-color 0.15s;
 }
@@ -213,6 +214,27 @@ body {
     padding: 16px;
 }
 
+.hint {
+    color: var(--muted);
+    font-size: 0.8125rem;
+}
+
+.wide {
+    width: 100%;
+}
+
+.scroll {
+    overflow-x: auto;
+}
+
+.panel h3 {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--muted);
+}
+
 .note {
     padding: 8px 12px;
     border-radius: 8px;
@@ -255,6 +277,24 @@ body {
 
 .facts dd {
     overflow-wrap: anywhere;
+}
+
+.data-table {
+    border-collapse: collapse;
+    font-size: 0.875rem;
+}
+
+.data-table th,
+.data-table td {
+    padding: 5px 10px;
+    border: 1px solid var(--rule);
+    text-align: left;
+    vertical-align: top;
+}
+
+.data-table thead th {
+    background: var(--hover);
+    font-weight: 600;
 }
 
 .dialog {

@@ -6,20 +6,23 @@
 -->
 
 <script lang="ts">
-    import { tick } from "svelte";
+    import { onMount, tick } from "svelte";
     import { toDfa } from "../../lib/automata/fa/convert.ts";
     import { faExamples } from "../../lib/automata/fa/examples.ts";
     import { createFiniteAutomaton, type FaTransition, type FiniteAutomaton } from "../../lib/automata/fa/model.ts";
     import { FaEditor } from "../../lib/editor/fa-editor.svelte.ts";
     import type { Tool } from "../../lib/editor/graph-editor.ts";
     import { renderMachineSvg } from "../../lib/graph/svg.ts";
+    import { loadAutosave, storeAutosave } from "../../lib/io/autosave.ts";
     import { faFromJson, faToJson } from "../../lib/io/document.ts";
-    import { downloadFile, fileBaseName, pickTextFile, svgToPng } from "../../lib/io/files.ts";
+    import { downloadDocument, pickTextFile, svgToPng } from "../../lib/io/files.ts";
+    import { takeHandedOffAutomaton } from "../../lib/io/handoff.ts";
     import { faFromJff, faToJff } from "../../lib/io/jff.ts";
-    import { withBase } from "../../lib/paths.ts";
     import { tooltip } from "../../lib/ui/tooltip.ts";
     import GraphCanvas from "../editor/GraphCanvas.svelte";
+    import AppHeader from "../ui/AppHeader.svelte";
     import Dropdown, { type DropdownItem } from "../ui/Dropdown.svelte";
+    import Tabs from "../ui/Tabs.svelte";
     import BatchPanel from "./BatchPanel.svelte";
     import DefinitionDialog from "./DefinitionDialog.svelte";
     import PropertiesPanel from "./PropertiesPanel.svelte";
@@ -27,7 +30,7 @@
 
     const AUTOSAVE_KEY = "automata:fa:autosave";
 
-    const editor = new FaEditor(restore() ?? faExamples[0].create());
+    const editor = new FaEditor(loadAutosave(AUTOSAVE_KEY, faFromJson) ?? faExamples[0].create());
 
     let canvas: ReturnType<typeof GraphCanvas<FaTransition>> | undefined = $state();
     let definitionDialog: ReturnType<typeof DefinitionDialog> | undefined = $state();
@@ -56,7 +59,7 @@
         { label: "Speichern", description: "Als Automata-JSON herunterladen", shortcut: "Strg+S", action: saveJson },
         { label: "Als JFLAP-Datei exportieren", description: "Kompatibel mit JFLAP 7 (.jff)", action: exportJff },
         "separator",
-        { label: "Diagramm als SVG", action: () => downloadFile(`${fileBaseName(editor.machine.title)}.svg`, diagramSvg(), "image/svg+xml") },
+        { label: "Diagramm als SVG", action: () => downloadDocument(editor.machine.title, "svg", diagramSvg()) },
         { label: "Diagramm als PNG", action: exportPng },
     ];
 
@@ -66,14 +69,7 @@
         action: () => load(example.create()),
     }));
 
-    $effect(() => {
-        const json = faToJson($state.snapshot(editor.machine) as FiniteAutomaton);
-        try {
-            localStorage.setItem(AUTOSAVE_KEY, json);
-        } catch {
-            // Storage can be unavailable (private mode, quota); the editor keeps working without autosave.
-        }
-    });
+    $effect(() => storeAutosave(AUTOSAVE_KEY, faToJson(editor.snapshot())));
 
     $effect(() => {
         if (tab !== "simulation") {
@@ -81,14 +77,15 @@
         }
     });
 
-    function restore(): FiniteAutomaton | null {
-        try {
-            const json = localStorage.getItem(AUTOSAVE_KEY);
-            return json ? faFromJson(json) : null;
-        } catch {
-            return null;
+    onMount(() => {
+        // Loading as a regular change keeps the previous automaton reachable via undo.
+        const handedOff = takeHandedOffAutomaton();
+        if (handedOff) {
+            load(handedOff);
+            notify(`„${handedOff.title}“ übernommen.`);
         }
-    }
+    });
+
 
     function notify(message: string) {
         const id = Date.now();
@@ -117,11 +114,11 @@
     }
 
     function saveJson() {
-        downloadFile(`${fileBaseName(editor.machine.title)}.json`, faToJson(editor.snapshot()), "application/json");
+        downloadDocument(editor.machine.title, "json", faToJson(editor.snapshot()));
     }
 
     function exportJff() {
-        downloadFile(`${fileBaseName(editor.machine.title)}.jff`, faToJff(editor.snapshot()), "application/xml");
+        downloadDocument(editor.machine.title, "jff", faToJff(editor.snapshot()));
     }
 
     function diagramSvg() {
@@ -130,7 +127,7 @@
 
     async function exportPng() {
         try {
-            downloadFile(`${fileBaseName(editor.machine.title)}.png`, await svgToPng(diagramSvg()), "image/png");
+            downloadDocument(editor.machine.title, "png", await svgToPng(diagramSvg()));
         } catch {
             notify("Der PNG-Export ist fehlgeschlagen.");
         }
@@ -188,12 +185,7 @@
 <svelte:window onkeydown={onKeyDown}/>
 
 <div class="workbench">
-    <header class="topbar">
-        <a class="brand" href={withBase("/")} aria-label="Zur Startseite">
-            <svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="9" cy="16" r="6"/><circle cx="23" cy="16" r="6"/><circle cx="23" cy="16" r="3.5"/><path d="M15 16h2"/></svg>
-            <span>Automata</span>
-        </a>
-        <span class="module">Endlicher Automat</span>
+    <AppHeader module="Endlicher Automat">
         <input
             class="title"
             value={editor.machine.title}
@@ -213,7 +205,7 @@
             </button>
             <button class="button primary" onclick={() => definitionDialog?.open()}>Formale Definition</button>
         </nav>
-    </header>
+    </AppHeader>
 
     <main class="stage">
         <div class="rail" role="toolbar" aria-label="Werkzeuge">
@@ -256,11 +248,15 @@
         </div>
 
         <aside class="sidebar">
-            <div class="tabs" role="tablist" aria-label="Werkzeuge für den Automaten">
-                <button role="tab" aria-selected={tab === "simulation"} onclick={() => (tab = "simulation")}>Simulation</button>
-                <button role="tab" aria-selected={tab === "batch"} onclick={() => (tab = "batch")}>Mehrfachtest</button>
-                <button role="tab" aria-selected={tab === "properties"} onclick={() => (tab = "properties")}>Eigenschaften</button>
-            </div>
+            <Tabs
+                label="Werkzeuge für den Automaten"
+                tabs={[
+                    { id: "simulation", label: "Simulation" },
+                    { id: "batch", label: "Mehrfachtest" },
+                    { id: "properties", label: "Eigenschaften" },
+                ]}
+                bind:value={tab}
+            />
             <div class="tab-body" role="tabpanel">
                 {#if tab === "simulation"}
                     <SimulationPanel fa={editor.machine} onhighlight={(value) => (highlight = value)}/>
@@ -285,42 +281,6 @@
         display: grid;
         grid-template-rows: auto 1fr;
         height: 100dvh;
-    }
-
-    .topbar {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 10px 16px;
-        border-bottom: 1px solid var(--rule);
-        background: var(--surface);
-    }
-
-    .brand {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        color: var(--ink);
-        font-weight: 650;
-        letter-spacing: -0.01em;
-        text-decoration: none;
-    }
-
-    .brand svg {
-        width: 28px;
-        height: 28px;
-        fill: none;
-        stroke: var(--accent);
-        stroke-width: 2;
-    }
-
-    .module {
-        padding: 2px 10px;
-        border-radius: 999px;
-        background: var(--hover);
-        color: var(--muted);
-        font-size: 0.8125rem;
-        white-space: nowrap;
     }
 
     .title {
@@ -405,34 +365,6 @@
         background: var(--surface);
     }
 
-    .tabs {
-        display: flex;
-        gap: 4px;
-        padding: 10px 12px 0;
-        border-bottom: 1px solid var(--rule);
-    }
-
-    .tabs button {
-        padding: 8px 10px;
-        border: 0;
-        border-bottom: 2px solid transparent;
-        background: none;
-        color: var(--muted);
-        font: inherit;
-        font-size: 0.875rem;
-        font-weight: 550;
-        cursor: pointer;
-    }
-
-    .tabs button:hover {
-        color: var(--ink);
-    }
-
-    .tabs button[aria-selected="true"] {
-        border-bottom-color: var(--accent);
-        color: var(--ink);
-    }
-
     .tab-body {
         flex: 1;
         overflow-y: auto;
@@ -465,14 +397,6 @@
         .workbench {
             height: auto;
             min-height: 100dvh;
-        }
-
-        .topbar {
-            flex-wrap: wrap;
-        }
-
-        .module {
-            display: none;
         }
 
         .title {

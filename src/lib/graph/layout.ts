@@ -44,6 +44,14 @@ export function layeredLayout(states: readonly StateNode[], edges: readonly Edge
     return positions;
 }
 
+/** Moves every state to its position from {@link layeredLayout}, mutating the given states. */
+export function applyLayout(states: StateNode[], edges: readonly Edge[]): void {
+    const positions = layeredLayout(states, edges);
+    for (const state of states) {
+        Object.assign(state, positions.get(state.id));
+    }
+}
+
 function bfsLayers(root: string, neighbors: ReadonlyMap<string, ReadonlySet<string>>): string[][] {
     const depth = new Map([[root, 0]]);
     const layers: string[][] = [[root]];

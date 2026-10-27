@@ -6,17 +6,20 @@
 -->
 
 <script lang="ts">
+    import { untrack } from "svelte";
     import { EPSILON } from "../../lib/automata/machine.ts";
     import type { FiniteAutomaton } from "../../lib/automata/fa/model.ts";
     import { simulate } from "../../lib/automata/fa/simulate.ts";
 
     interface Props {
         fa: FiniteAutomaton;
+        /** Words prefilled once, one per line. */
+        initialWords?: string;
     }
 
-    let { fa }: Props = $props();
+    let { fa, initialWords = "ε\n0\n1\n-101\n-0\n01" }: Props = $props();
 
-    let words = $state("ε\n0\n1\n-101\n-0\n01");
+    let words = $state(untrack(() => initialWords));
 
     const results = $derived(
         words

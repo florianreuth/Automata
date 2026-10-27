@@ -15,9 +15,10 @@
         transitionSignature,
     } from "../../lib/automata/fa/definition.ts";
     import { displaySymbol } from "../../lib/automata/fa/model.ts";
+    import { formatSet } from "../../lib/automata/machine.ts";
     import type { FaEditor } from "../../lib/editor/fa-editor.svelte.ts";
     import { renderMachineSvg } from "../../lib/graph/svg.ts";
-    import { downloadFile, fileBaseName, svgToPng } from "../../lib/io/files.ts";
+    import { downloadDocument, svgToPng } from "../../lib/io/files.ts";
     import { escapeMarkup } from "../../lib/markup.ts";
     import { tooltip } from "../../lib/ui/tooltip.ts";
 
@@ -54,7 +55,7 @@
 
     async function downloadPng() {
         try {
-            downloadFile(`${fileBaseName(editor.machine.title)}.png`, await svgToPng(svg), "image/png");
+            downloadDocument(editor.machine.title, "png", await svgToPng(svg));
         } catch {
             onnotify("Der PNG-Export ist fehlgeschlagen.");
         }
@@ -129,7 +130,7 @@
         <p>{definition.name} = (Q, Σ, δ, {#if definition.initial}{@render stateName(definition.initial)}{:else}q<sub>0</sub>{/if}, F)</p>
         <p class="sets">
             <span>Q = {@render stateSet(definition.states)}</span>
-            <span>Σ = {definition.alphabet.length > 0 ? `{${definition.alphabet.join(", ")}}` : "∅"}</span>
+            <span>Σ = {formatSet(definition.alphabet)}</span>
             <span>F = {@render stateSet(definition.finals)}</span>
             <span>δ ist dargestellt durch{showTable && showGraph ? " Tabelle und Graph" : ""}</span>
         </p>
@@ -178,7 +179,7 @@
         <button class="button" onclick={() => copy(definitionToMarkdown(definition), "Markdown")}>Markdown kopieren</button>
         <button class="button" onclick={() => copy(definitionToLatex(definition), "LaTeX")}>LaTeX kopieren</button>
         <span class="spacer"></span>
-        <button class="button" onclick={() => downloadFile(`${fileBaseName(editor.machine.title)}.svg`, svg, "image/svg+xml")}>SVG</button>
+        <button class="button" onclick={() => downloadDocument(editor.machine.title, "svg", svg)}>SVG</button>
         <button class="button" onclick={downloadPng}>PNG</button>
         <button class="button primary" onclick={print}>Drucken / PDF</button>
     </footer>

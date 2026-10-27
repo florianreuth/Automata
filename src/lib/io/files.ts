@@ -3,8 +3,19 @@
 //
 // Copyright (c) 2026 Florian Reuth <git@florianreuth.de>
 
-/** Offers a file for download in the browser. */
-export function downloadFile(name: string, content: BlobPart, type: string): void {
+const MIME_TYPES = {
+    json: "application/json",
+    jff: "application/xml",
+    svg: "image/svg+xml",
+    png: "image/png",
+} as const;
+
+/** Offers content for download, named after the document title with the given extension. */
+export function downloadDocument(title: string, extension: keyof typeof MIME_TYPES, content: BlobPart): void {
+    downloadFile(`${fileBaseName(title)}.${extension}`, content, MIME_TYPES[extension]);
+}
+
+function downloadFile(name: string, content: BlobPart, type: string): void {
     const url = URL.createObjectURL(new Blob([content], { type }));
     const link = document.createElement("a");
     link.href = url;
@@ -42,8 +53,8 @@ export async function svgToPng(svg: string, scale = 2): Promise<Blob> {
     return new Promise((resolve, reject) => canvas.toBlob((blob) => (blob ? resolve(blob) : reject(new Error("PNG-Export fehlgeschlagen."))), "image/png"));
 }
 
-/** Turns a document title into a safe lowercase file name, "automat" if nothing remains. */
-export function fileBaseName(title: string): string {
+// Lowercase ASCII only, so the name is safe on every file system; "automat" if nothing remains.
+function fileBaseName(title: string): string {
     const base = title
         .toLowerCase()
         .replace(/ä/g, "ae")

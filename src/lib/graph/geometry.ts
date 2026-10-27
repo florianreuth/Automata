@@ -77,7 +77,7 @@ export class EdgeRouter<T extends Edge = Edge> {
 }
 
 /** Groups transitions by their (from, to) pair, in first-seen order. */
-export function groupEdges<T extends Edge>(transitions: readonly T[]): EdgeGroup<T>[] {
+function groupEdges<T extends Edge>(transitions: readonly T[]): EdgeGroup<T>[] {
     const groups = new Map<string, EdgeGroup<T>>();
     for (const transition of transitions) {
         const key = edgeKey(transition.from, transition.to);
@@ -95,7 +95,7 @@ export function groupEdges<T extends Edge>(transitions: readonly T[]): EdgeGroup
  * Signed offset of the curve apex from the straight line, 0 for a straight edge. Edges with a reverse
  * counterpart bend so both stay visible, straight edges that would cross another state bend around it.
  */
-export function edgeBend(from: StateNode, to: StateNode, hasReverse: boolean, states: readonly StateNode[]): number {
+function edgeBend(from: StateNode, to: StateNode, hasReverse: boolean, states: readonly StateNode[]): number {
     const dx = to.x - from.x;
     const dy = to.y - from.y;
     const length = Math.hypot(dx, dy);
@@ -124,7 +124,7 @@ export function edgeBend(from: StateNode, to: StateNode, hasReverse: boolean, st
 }
 
 /** Computes the arrow of an edge group from a {@link edgeBend} offset; loopDirection (radians) only applies to self-loops. */
-export function edgeShape(from: Point, to: Point, bend: number, loopDirection = UP): EdgeShape {
+function edgeShape(from: Point, to: Point, bend: number, loopDirection = UP): EdgeShape {
     if (Math.hypot(to.x - from.x, to.y - from.y) < 1) {
         return loopShape(from, loopDirection);
     }
@@ -166,7 +166,7 @@ function anchorFor(horizontalOffset: number): EdgeShape["labelAnchor"] {
 }
 
 /** Computes a self-loop pointing away from the state; direction in radians, -π/2 points up. */
-export function loopShape(center: Point, direction = UP): EdgeShape {
+function loopShape(center: Point, direction = UP): EdgeShape {
     const out = { x: Math.cos(direction), y: Math.sin(direction) };
     const side = { x: -out.y, y: out.x };
     const at = (lateral: number, outward: number) => ({ x: center.x + side.x * lateral + out.x * outward, y: center.y + side.y * lateral + out.y * outward });
@@ -187,7 +187,7 @@ export function loopShape(center: Point, direction = UP): EdgeShape {
 }
 
 /** Picks for every state with a self-loop the side (up, down, right, left) farthest from its other edges, in radians. */
-export function loopDirections(states: readonly StateNode[], transitions: readonly Edge[]): Map<string, number> {
+function loopDirections(states: readonly StateNode[], transitions: readonly Edge[]): Map<string, number> {
     const byId = new Map(states.map((state) => [state.id, state]));
     const result = new Map<string, number>();
     for (const state of states) {

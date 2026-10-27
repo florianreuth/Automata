@@ -160,10 +160,6 @@
         flex: 1;
     }
 
-    .wide {
-        width: 100%;
-    }
-
     .tape {
         display: flex;
         flex-wrap: wrap;

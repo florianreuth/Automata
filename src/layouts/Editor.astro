@@ -1,0 +1,29 @@
+---
+// This project is licensed under the MIT License.
+// See the LICENSE file in the project root for details.
+//
+// Copyright (c) 2026 Florian Reuth <git@florianreuth.de>
+
+import Base from "./Base.astro";
+
+interface Props {
+    title: string;
+    description: string;
+}
+
+const { title, description } = Astro.props;
+---
+
+<Base {title} {description}>
+    <slot/>
+    <noscript>
+        <p class="noscript">Der Editor benötigt JavaScript. Bitte aktiviere JavaScript in deinem Browser.</p>
+    </noscript>
+</Base>
+
+<style>
+    .noscript {
+        padding: 32px 16px;
+        text-align: center;
+    }
+</style>

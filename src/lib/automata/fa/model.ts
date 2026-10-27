@@ -103,6 +103,11 @@ export function formatSymbols(symbols: readonly string[]): string {
     return [...symbols].sort(compareSymbols).map(displaySymbol).join(", ");
 }
 
+/** Label of an edge that combines the given transitions, e.g. "0, 1, ε". */
+export function transitionLabel(transitions: readonly FaTransition[]): string {
+    return formatSymbols(transitions.map((t) => t.symbol));
+}
+
 /** Sorts ε last and everything else naturally. */
 export function compareSymbols(a: string, b: string): number {
     if (a === "" || b === "") {

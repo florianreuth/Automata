@@ -1,0 +1,13 @@
+---
+// This project is licensed under the MIT License.
+// See the LICENSE file in the project root for details.
+//
+// Copyright (c) 2026 Florian Reuth <git@florianreuth.de>
+
+import GrammarWorkbench from "../components/grammar/GrammarWorkbench.svelte";
+import Editor from "../layouts/Editor.astro";
+---
+
+<Editor title="Grammatiken & Parsing – Automata" description="Kontextfreie Grammatiken klassifizieren, in Chomsky-Normalform bringen und mit CYK- und LL(1)-Parser ableiten.">
+    <GrammarWorkbench client:only="svelte"/>
+</Editor>
