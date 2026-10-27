@@ -72,7 +72,7 @@
             bind:value={input}
             oninput={() => (running = false)}
             onkeydown={(event) => event.key === "Enter" && start()}
-            placeholder="leer lassen für ε"
+            placeholder="Wort eingeben, z. B. 0101"
             spellcheck="false"
             autocomplete="off"
         />
