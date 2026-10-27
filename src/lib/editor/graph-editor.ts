@@ -4,7 +4,7 @@
 // Copyright (c) 2026 Florian Reuth <git@florianreuth.de>
 
 import type { Edge, Machine } from "../automata/machine.ts";
-import type { EdgeGroup } from "../graph/geometry.ts";
+import type { EdgeGroup } from "../graph/edges.ts";
 
 export type Tool = "select" | "state" | "transition" | "delete";
 

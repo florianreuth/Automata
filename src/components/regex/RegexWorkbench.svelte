@@ -10,7 +10,8 @@
     import { formatSet } from "../../lib/automata/machine.ts";
     import { regexToNfa } from "../../lib/automata/regex/convert.ts";
     import { regexExamples } from "../../lib/automata/regex/examples.ts";
-    import { parseRegex, type Regex, RegexSyntaxError } from "../../lib/automata/regex/regex.ts";
+    import { parseRegex, RegexSyntaxError } from "../../lib/automata/regex/parser.ts";
+    import type { Regex } from "../../lib/automata/regex/regex.ts";
     import { renderMachineSvg } from "../../lib/graph/svg.ts";
     import { handOffAutomaton } from "../../lib/io/handoff.ts";
     import { withBase } from "../../lib/paths.ts";

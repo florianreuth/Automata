@@ -5,7 +5,8 @@
 
 import type { Edge, Machine } from "../automata/machine.ts";
 import { escapeMarkup } from "../markup.ts";
-import { type EdgeGroup, EdgeRouter, graphBounds, initialArrowPath, LABEL_BASELINE, NAME_BASELINE, STATE_RADIUS } from "./geometry.ts";
+import { type EdgeGroup, EdgeRouter } from "./edges.ts";
+import { graphBounds, initialArrowPath, LABEL_BASELINE, NAME_BASELINE, STATE_RADIUS } from "./geometry.ts";
 
 const INK = "#1a1b2e";
 const MUTED = "#5f6178";

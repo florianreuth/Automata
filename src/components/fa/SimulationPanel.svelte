@@ -9,7 +9,7 @@
     import { displaySymbol, type FiniteAutomaton } from "../../lib/automata/fa/model.ts";
     import { blockedStep, missingTransitions, simulate, stepTransitions } from "../../lib/automata/fa/simulate.ts";
     import { formatSet, naturalCompare } from "../../lib/automata/machine.ts";
-    import { edgeKey } from "../../lib/graph/geometry.ts";
+    import { edgeKey } from "../../lib/graph/edges.ts";
     import { tooltip } from "../../lib/ui/tooltip.ts";
 
     interface Props {

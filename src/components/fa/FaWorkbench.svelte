@@ -12,51 +12,41 @@
     import { createFiniteAutomaton, type FaTransition, type FiniteAutomaton } from "../../lib/automata/fa/model.ts";
     import { FaEditor } from "../../lib/editor/fa-editor.svelte.ts";
     import type { Tool } from "../../lib/editor/graph-editor.ts";
+    import { type Command, commandFor } from "../../lib/editor/shortcuts.ts";
+    import { toolDefinition } from "../../lib/editor/tools.ts";
     import { renderMachineSvg } from "../../lib/graph/svg.ts";
     import { loadAutosave, storeAutosave } from "../../lib/io/autosave.ts";
     import { faFromJson, faToJson } from "../../lib/io/document.ts";
     import { downloadDocument, pickTextFile, svgToPng } from "../../lib/io/files.ts";
     import { takeHandedOffAutomaton } from "../../lib/io/handoff.ts";
-    import { faFromJff, faToJff } from "../../lib/io/jff.ts";
+    import { AUTOMATON_FILE_TYPES, faFromFile } from "../../lib/io/import.ts";
+    import { faToJff } from "../../lib/io/jff.ts";
+    import { Toast } from "../../lib/ui/toast.svelte.ts";
     import { tooltip } from "../../lib/ui/tooltip.ts";
     import GraphCanvas from "../editor/GraphCanvas.svelte";
+    import ToolRail from "../editor/ToolRail.svelte";
     import AppHeader from "../ui/AppHeader.svelte";
     import Dropdown, { type DropdownItem } from "../ui/Dropdown.svelte";
     import Tabs from "../ui/Tabs.svelte";
+    import ToastMessage from "../ui/ToastMessage.svelte";
     import BatchPanel from "./BatchPanel.svelte";
     import DefinitionDialog from "./DefinitionDialog.svelte";
     import PropertiesPanel from "./PropertiesPanel.svelte";
     import SimulationPanel from "./SimulationPanel.svelte";
 
     const AUTOSAVE_KEY = "automata:fa:autosave";
-    const ZOOM_STEP = 1.2;
-    const TOAST_DURATION_MS = 3200;
 
     const editor = new FaEditor(loadAutosave(AUTOSAVE_KEY, faFromJson) ?? faExamples[0].create());
+    const toast = new Toast();
 
     let canvas: ReturnType<typeof GraphCanvas<FaTransition>> | undefined = $state();
     let definitionDialog: ReturnType<typeof DefinitionDialog> | undefined = $state();
     let tab = $state<"simulation" | "batch" | "properties">("simulation");
     let highlight = $state<{ states: ReadonlySet<string>; edges: ReadonlySet<string> } | null>(null);
-    let toast = $state<{ message: string; id: number } | null>(null);
-
-    const tools: { id: Tool; label: string; key: string; icon: string }[] = [
-        { id: "select", label: "Auswählen und verschieben", key: "V", icon: "M5 3l14 8-6 1.5L10 19z" },
-        { id: "state", label: "Zustand hinzufügen", key: "Z", icon: "M12 4a8 8 0 1 0 0 16 8 8 0 0 0 0-16zm0 4v8m-4-4h8" },
-        { id: "transition", label: "Übergang ziehen", key: "U", icon: "M4 18C8 6 16 6 20 10m0 0-1-5m1 5-5 1" },
-        { id: "delete", label: "Löschen", key: "L", icon: "M5 7h14M10 7V4h4v3m-7 0 1 13h8l1-13" },
-    ];
-
-    const hints: Record<Tool, string> = {
-        select: "Ziehen verschiebt · Umschalt+Ziehen erzeugt Übergänge · Doppelklick legt Zustände an · Rechtsklick öffnet Optionen",
-        state: "Klicken legt einen Zustand an · der erste Zustand wird Startzustand",
-        transition: "Von Zustand zu Zustand ziehen · Klick auf einen Zustand erzeugt eine Schleife",
-        delete: "Zustände oder Übergänge anklicken, um sie zu löschen",
-    };
 
     const fileItems: DropdownItem[] = [
         { label: "Neu", description: "Leere Arbeitsfläche", action: () => load(createFiniteAutomaton()) },
-        { label: "Öffnen …", description: "Automata-JSON oder JFLAP (.jff)", shortcut: "Strg+O", action: open },
+        { label: "Öffnen …", description: "Automata-JSON oder JFLAP (.jff)", shortcut: "Strg+O", action: openFile },
         "separator",
         { label: "Speichern", description: "Als Automata-JSON herunterladen", shortcut: "Strg+S", action: saveJson },
         { label: "Als JFLAP-Datei exportieren", description: "Kompatibel mit JFLAP 7 (.jff)", action: exportJff },
@@ -71,6 +61,21 @@
         action: () => load(example.create()),
     }));
 
+    const commands: Record<Exclude<Command, { tool: Tool }>, () => void> = {
+        undo: () => editor.undo(),
+        redo: () => editor.redo(),
+        save: saveJson,
+        open: openFile,
+        delete: () => editor.deleteSelection(),
+        rename: () => canvas?.renameSelected(),
+        cancel: () => {
+            editor.selection = null;
+            editor.tool = "select";
+        },
+        fit: () => canvas?.fit(),
+        arrange: () => canvas?.arrange(),
+    };
+
     $effect(() => storeAutosave(AUTOSAVE_KEY, faToJson(editor.snapshot())));
 
     $effect(() => {
@@ -84,16 +89,9 @@
         const handedOff = takeHandedOffAutomaton();
         if (handedOff) {
             load(handedOff);
-            notify(`„${handedOff.title}“ übernommen.`);
+            toast.show(`„${handedOff.title}“ übernommen.`);
         }
     });
-
-
-    function notify(message: string) {
-        const id = Date.now();
-        toast = { message, id };
-        setTimeout(() => toast?.id === id && (toast = null), TOAST_DURATION_MS);
-    }
 
     async function load(fa: FiniteAutomaton) {
         editor.replace(fa);
@@ -101,17 +99,16 @@
         canvas?.fit();
     }
 
-    async function open() {
-        const file = await pickTextFile(".json,.jff,application/json");
+    async function openFile() {
+        const file = await pickTextFile(AUTOMATON_FILE_TYPES);
         if (!file) {
             return;
         }
         try {
-            const title = file.name.replace(/\.[^.]+$/, "");
-            await load(file.name.toLowerCase().endsWith(".jff") ? faFromJff(file.text, title) : faFromJson(file.text));
-            notify(`„${file.name}“ geöffnet.`);
+            await load(faFromFile(file.name, file.text));
+            toast.show(`„${file.name}“ geöffnet.`);
         } catch (error) {
-            notify(error instanceof Error ? error.message : "Die Datei konnte nicht geöffnet werden.");
+            toast.show(error instanceof Error ? error.message : "Die Datei konnte nicht geöffnet werden.");
         }
     }
 
@@ -131,7 +128,7 @@
         try {
             downloadDocument(editor.machine.title, "png", await svgToPng(diagramSvg()));
         } catch {
-            notify("Der PNG-Export ist fehlgeschlagen.");
+            toast.show("Der PNG-Export ist fehlgeschlagen.");
         }
     }
 
@@ -139,46 +136,25 @@
         try {
             const dfa = toDfa(editor.snapshot());
             await load(dfa);
-            notify(`In einen DEA mit ${dfa.states.length} Zuständen umgewandelt.`);
+            toast.show(`In einen DEA mit ${dfa.states.length} Zuständen umgewandelt.`);
         } catch (error) {
-            notify(error instanceof Error ? error.message : "Die Umwandlung ist fehlgeschlagen.");
+            toast.show(error instanceof Error ? error.message : "Die Umwandlung ist fehlgeschlagen.");
         }
     }
 
     function onKeyDown(event: KeyboardEvent) {
-        const target = event.target as HTMLElement;
-        if (target.closest("input, textarea, select, [contenteditable], dialog[open]")) {
+        // Typing in fields and dialogs must not trigger editor shortcuts.
+        if ((event.target as HTMLElement).closest("input, textarea, select, [contenteditable], dialog[open]")) {
             return;
         }
-        const mod = event.ctrlKey || event.metaKey;
-        const key = event.key.toLowerCase();
-        if (mod && key === "z" && !event.shiftKey) {
-            editor.undo();
-        } else if (mod && (key === "y" || (key === "z" && event.shiftKey))) {
-            editor.redo();
-        } else if (mod && key === "s") {
-            saveJson();
-        } else if (mod && key === "o") {
-            open();
-        } else if (mod) {
+        const command = commandFor(event);
+        if (command === null) {
             return;
-        } else if (event.key === "Delete" || event.key === "Backspace") {
-            editor.deleteSelection();
-        } else if (event.key === "F2") {
-            canvas?.renameSelected();
-        } else if (event.key === "Escape") {
-            editor.selection = null;
-            editor.tool = "select";
-        } else if (key === "f") {
-            canvas?.fit();
-        } else if (key === "a") {
-            canvas?.arrange();
+        }
+        if (typeof command === "object") {
+            editor.tool = command.tool;
         } else {
-            const tool = tools.find((candidate) => candidate.key.toLowerCase() === key);
-            if (!tool) {
-                return;
-            }
-            editor.tool = tool.id;
+            commands[command]();
         }
         event.preventDefault();
     }
@@ -210,43 +186,17 @@
     </AppHeader>
 
     <main class="stage">
-        <div class="rail" role="toolbar" aria-label="Werkzeuge">
-            {#each tools as tool (tool.id)}
-                <button
-                    class="icon-button"
-                    class:active={editor.tool === tool.id}
-                    aria-pressed={editor.tool === tool.id}
-                    {@attach tooltip(`${tool.label} (${tool.key})`, "right")}
-                    aria-label={tool.label}
-                    onclick={() => (editor.tool = tool.id)}
-                >
-                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d={tool.icon}/></svg>
-                </button>
-            {/each}
-            <span class="divider"></span>
-            <button class="icon-button" onclick={() => canvas?.zoom(ZOOM_STEP)} aria-label="Vergrößern" {@attach tooltip("Vergrößern", "right")}>
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5a6 6 0 1 0 0 12 6 6 0 0 0 0-12zm9 15-4.7-4.7M11 8v6m-3-3h6"/></svg>
-            </button>
-            <button class="icon-button" onclick={() => canvas?.zoom(1 / ZOOM_STEP)} aria-label="Verkleinern" {@attach tooltip("Verkleinern", "right")}>
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5a6 6 0 1 0 0 12 6 6 0 0 0 0-12zm9 15-4.7-4.7M8 11h6"/></svg>
-            </button>
-            <button class="icon-button" onclick={() => canvas?.fit()} aria-label="Ansicht anpassen" {@attach tooltip("Ansicht anpassen (F)", "right")}>
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5m6 0h5v5m0 6v5h-5m-6 0H4v-5"/></svg>
-            </button>
-            <button
-                class="icon-button"
-                onclick={() => canvas?.arrange()}
-                disabled={editor.machine.states.length === 0}
-                {@attach tooltip("Automatisch anordnen (A)", "right")}
-                aria-label="Automatisch anordnen"
-            >
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5h5v5H4zm11-6h5v5h-5zm0 12h5v5h-5zM9 12h3m0-6.5v13M12 6h3m-3 12h3"/></svg>
-            </button>
-        </div>
+        <ToolRail
+            bind:tool={editor.tool}
+            canArrange={editor.machine.states.length > 0}
+            onzoom={(factor) => canvas?.zoom(factor)}
+            onfit={() => canvas?.fit()}
+            onarrange={() => canvas?.arrange()}
+        />
 
         <div class="canvas-area">
             <GraphCanvas bind:this={canvas} {editor} activeStates={highlight?.states} activeEdges={highlight?.edges}/>
-            <p class="hint">{hints[editor.tool]}</p>
+            <p class="hint">{toolDefinition(editor.tool).hint}</p>
         </div>
 
         <aside class="sidebar">
@@ -271,11 +221,8 @@
         </aside>
     </main>
 
-    <DefinitionDialog bind:this={definitionDialog} {editor} onnotify={notify}/>
-
-    {#if toast}
-        <div class="toast" role="status">{toast.message}</div>
-    {/if}
+    <DefinitionDialog bind:this={definitionDialog} {editor} onnotify={(message) => toast.show(message)}/>
+    <ToastMessage {toast}/>
 </div>
 
 <style>
@@ -326,22 +273,6 @@
         min-height: 0;
     }
 
-    .rail {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 6px;
-        padding: 12px 8px;
-        border-right: 1px solid var(--rule);
-        background: var(--surface);
-    }
-
-    .rail .divider {
-        width: 24px;
-        height: 1px;
-        margin: 4px 0;
-    }
-
     .canvas-area {
         position: relative;
         min-width: 0;
@@ -353,8 +284,6 @@
         left: 16px;
         right: 16px;
         bottom: 12px;
-        color: var(--muted);
-        font-size: 0.8125rem;
         text-align: center;
         pointer-events: none;
     }
@@ -370,29 +299,6 @@
     .tab-body {
         flex: 1;
         overflow-y: auto;
-    }
-
-    .toast {
-        position: fixed;
-        left: 50%;
-        bottom: 24px;
-        z-index: 50;
-        max-width: calc(100vw - 32px);
-        padding: 10px 16px;
-        border-radius: 10px;
-        background: var(--ink);
-        color: var(--bg);
-        font-size: 0.875rem;
-        box-shadow: var(--shadow);
-        transform: translateX(-50%);
-        animation: rise 0.3s var(--ease);
-    }
-
-    @keyframes rise {
-        from {
-            opacity: 0;
-            transform: translate(-50%, 8px);
-        }
     }
 
     @media (max-width: 960px) {
@@ -412,19 +318,6 @@
 
         .stage {
             grid-template-columns: 1fr;
-        }
-
-        .rail {
-            flex-direction: row;
-            justify-content: center;
-            border-right: 0;
-            border-bottom: 1px solid var(--rule);
-        }
-
-        .rail .divider {
-            width: 1px;
-            height: 24px;
-            margin: 0 4px;
         }
 
         .canvas-area {

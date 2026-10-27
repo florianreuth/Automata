@@ -5,7 +5,7 @@
 
 import { createId, nextStateName } from "../automata/machine.ts";
 import { compareSymbols, createFiniteAutomaton, type FaTransition, type FiniteAutomaton, formatSymbols, parseSymbols, transitionLabel } from "../automata/fa/model.ts";
-import type { EdgeGroup } from "../graph/geometry.ts";
+import type { EdgeGroup } from "../graph/edges.ts";
 import { applyLayout } from "../graph/layout.ts";
 import type { GraphEditor, Selection, Tool } from "./graph-editor.ts";
 

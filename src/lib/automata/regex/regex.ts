@@ -18,31 +18,14 @@ export type Regex =
 export const EMPTY: Regex = { kind: "empty" };
 export const EPSILON_REGEX: Regex = { kind: "epsilon" };
 
-const EMPTY_SET = "∅";
-const POSTFIX = new Map<string, "star" | "plus" | "optional">([
+export const EMPTY_SET = "∅";
+/** Postfix operators and the node kind each one creates. */
+export const POSTFIX_OPERATORS = new Map<string, "star" | "plus" | "optional">([
     ["*", "star"],
     ["+", "plus"],
     ["?", "optional"],
 ]);
-const RESERVED = new Set(["|", "(", ")", "\\", EPSILON, "λ", EMPTY_SET, ...POSTFIX.keys()]);
-
-/** A syntax error with the zero-based code point position in the source. */
-export class RegexSyntaxError extends Error {
-    readonly position: number;
-
-    constructor(message: string, position: number) {
-        super(message);
-        this.position = position;
-    }
-}
-
-/**
- * Parses a regular expression with |, *, +, ?, parentheses, ε, ∅ and \ for literal operators; whitespace is ignored.
- * @throws RegexSyntaxError with a German message
- */
-export function parseRegex(source: string): Regex {
-    return new RegexParser(source).parse();
-}
+const RESERVED = new Set(["|", "(", ")", "\\", EPSILON, "λ", EMPTY_SET, ...POSTFIX_OPERATORS.keys()]);
 
 /** Formats a regular expression with as few parentheses as possible. */
 export function formatRegex(regex: Regex): string {
@@ -131,100 +114,5 @@ function format(regex: Regex, context: number): string {
             return `${format(regex.item, Precedence.Postfix)}+`;
         case "optional":
             return `${format(regex.item, Precedence.Postfix)}?`;
-    }
-}
-
-interface Token {
-    char: string;
-    position: number;
-}
-
-// Recursive descent: union := concat ("|" concat)*, concat := postfix*, postfix := atom ("*" | "+" | "?")*.
-class RegexParser {
-    readonly #tokens: Token[] = [];
-    readonly #length: number;
-    #index = 0;
-
-    constructor(source: string) {
-        let position = 0;
-        for (const char of source) {
-            if (!/\s/.test(char)) {
-                this.#tokens.push({ char, position });
-            }
-            position++;
-        }
-        this.#length = position;
-    }
-
-    parse(): Regex {
-        const result = this.#union();
-        const rest = this.#peek();
-        if (rest) {
-            throw new RegexSyntaxError(rest.char === ")" ? "Zu viele schließende Klammern." : `Unerwartetes Zeichen „${rest.char}“.`, rest.position);
-        }
-        return result;
-    }
-
-    #union(): Regex {
-        const items = [this.#concat()];
-        while (this.#peek()?.char === "|") {
-            this.#index++;
-            items.push(this.#concat());
-        }
-        return items.length === 1 ? items[0] : { kind: "union", items };
-    }
-
-    #concat(): Regex {
-        const items: Regex[] = [];
-        for (let token = this.#peek(); token && token.char !== "|" && token.char !== ")"; token = this.#peek()) {
-            items.push(this.#postfix());
-        }
-        if (items.length === 0) {
-            return EPSILON_REGEX;
-        }
-        return items.length === 1 ? items[0] : { kind: "concat", items };
-    }
-
-    #postfix(): Regex {
-        let item = this.#atom();
-        for (let kind = POSTFIX.get(this.#peek()?.char ?? ""); kind; kind = POSTFIX.get(this.#peek()?.char ?? "")) {
-            this.#index++;
-            item = { kind, item };
-        }
-        return item;
-    }
-
-    #atom(): Regex {
-        const token = this.#tokens[this.#index++];
-        switch (token.char) {
-            case "(": {
-                const inner = this.#union();
-                const close = this.#tokens[this.#index++];
-                if (close?.char !== ")") {
-                    throw new RegexSyntaxError("Die schließende Klammer fehlt.", close?.position ?? this.#length);
-                }
-                return inner;
-            }
-            case EPSILON:
-            case "λ":
-                return EPSILON_REGEX;
-            case EMPTY_SET:
-                return EMPTY;
-            case "\\": {
-                const escaped = this.#tokens[this.#index++];
-                if (!escaped) {
-                    throw new RegexSyntaxError("Nach „\\“ fehlt ein Zeichen.", token.position);
-                }
-                return symbol(escaped.char);
-            }
-        }
-        if (POSTFIX.has(token.char)) {
-            throw new RegexSyntaxError(`Vor „${token.char}“ fehlt ein Ausdruck.`, token.position);
-        }
-        return symbol(token.char);
-    }
-
-    #peek(): Token | undefined {
-        return this.#tokens[this.#index];
     }
 }

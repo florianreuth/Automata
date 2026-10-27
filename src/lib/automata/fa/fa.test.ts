@@ -6,7 +6,8 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { toDfa } from "./convert.ts";
-import { definitionToLatex, definitionToText, formalDefinition, transitionSignature } from "./definition.ts";
+import { definitionToLatex, definitionToText } from "./definition-export.ts";
+import { formalDefinition, transitionSignature } from "./definition.ts";
 import { faExamples } from "./examples.ts";
 import { layeredLayout } from "../../graph/layout.ts";
 import { isComplete, isDeterministic, parseSymbols, unreachableStates } from "./model.ts";

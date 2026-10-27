@@ -8,8 +8,9 @@ Guidelines for coding agents (and humans) working on Automata. Features and comm
 - Astro (static site) with Svelte 5 islands and strict TypeScript.
 - The user interface is German; code, identifiers, comments and docs are English. Error messages that reach the user
   are German, also when they come from `src/lib/`.
-- `npm test` runs the unit tests in `src/lib/` with `node --test`, `npm run build` type-checks with `astro check`. Both
-  must pass before a change is done.
+- `npm test` runs the unit tests in `src/lib/` with `node --test`, `npm run build` type-checks `.ts` and `.astro` files
+  with `astro check`. `astro check` skips `.svelte` files, so also run `npx svelte-check`. All must pass before a change
+  is done.
 - Code that needs the DOM (`src/lib/ui/`, parts of `src/lib/io/`) or Svelte runes (`*.svelte.ts`) cannot run under
   `node --test`; keep it thin and put the logic it uses into plain, tested functions.
 
@@ -52,8 +53,11 @@ Use these instead of writing new variants:
 
 - Layout: `layouts/Editor.astro` for editor pages, `Workbench` (header, content, sidebar), `AppHeader`, `Tabs`,
   `Dropdown`, `SymbolBar` for special characters.
-- Behaviour: `tooltip` and `autoReplace` attachments, `loadAutosave`/`storeAutosave`, `downloadDocument`, `printHtml`,
-  `handOffAutomaton` to open an automaton in the FA editor.
+- Behaviour: `tooltip` and `autoReplace` attachments, `Toast` with `ToastMessage`, `loadAutosave`/`storeAutosave`,
+  `downloadDocument`, `printHtml`, `faFromFile`, `handOffAutomaton` to open an automaton in the FA editor.
+- Graph editing: `GraphCanvas` with `GraphState`, `GraphEdge`, `CanvasMenu`, `InlineEditor` and `ToolRail`; input
+  handling is decided in `src/lib/editor/` (`pointerAction`, `commandFor`, `TOOLS`), drawing in `src/lib/graph/`
+  (`geometry.ts` for states and bounds, `edges.ts` for edge routing).
 - Formatting: `formatSet`, `naturalCompare`, `escapeMarkup`, `transitionLabel`.
 - Styles in `global.css`: `.panel`, `.field`, `.button`, `.icon-button`, `.note`, `.verdict`, `.facts`, `.data-table`,
   `.hint`, `.mono`, `.wide`, `.scroll`. Component styles only cover what is specific to that component.

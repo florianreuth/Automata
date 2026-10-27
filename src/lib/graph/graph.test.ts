@@ -8,10 +8,24 @@ import { describe, it } from "node:test";
 import { faExamples } from "../automata/fa/examples.ts";
 import { transitionLabel } from "../automata/fa/model.ts";
 import { type StateNode } from "../automata/machine.ts";
-import { edgeKey, EdgeRouter } from "./geometry.ts";
+import { edgeKey, EdgeRouter } from "./edges.ts";
+import { snapToGrid, stateAt } from "./geometry.ts";
 import { renderMachineSvg } from "./svg.ts";
 
 const state = (id: string, x: number, y: number): StateNode => ({ id, name: id, x, y, initial: false, final: false });
+
+describe("geometry", () => {
+    it("hits the topmost state under the point", () => {
+        const states = [state("a", 0, 0), state("b", 10, 0)];
+        assert.equal(stateAt(states, { x: 5, y: 0 })?.id, "b");
+        assert.equal(stateAt(states, { x: -27, y: 0 })?.id, "a");
+        assert.equal(stateAt(states, { x: 100, y: 100 }), null);
+    });
+
+    it("snaps to the grid", () => {
+        assert.deepEqual(snapToGrid({ x: 14, y: -6 }, 10), { x: 10, y: -10 });
+    });
+});
 
 describe("EdgeRouter", () => {
     const states = [state("a", 0, 0), state("b", 200, 0), state("c", 400, 0)];

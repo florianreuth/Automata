@@ -8,7 +8,8 @@ import { describe, it } from "node:test";
 import { faExamples } from "../fa/examples.ts";
 import { simulate } from "../fa/simulate.ts";
 import { faToRegex, regexToNfa } from "./convert.ts";
-import { concat, formatRegex, parseRegex, RegexSyntaxError, star, symbol, union } from "./regex.ts";
+import { parseRegex, RegexSyntaxError } from "./parser.ts";
+import { concat, formatRegex, star, symbol, union } from "./regex.ts";
 
 const nfaOf = (source: string) => regexToNfa(parseRegex(source), source);
 const accepts = (source: string, word: string) => simulate(nfaOf(source), word).accepted;
