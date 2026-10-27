@@ -17,6 +17,7 @@
     import { downloadFile, fileBaseName, pickTextFile, svgToPng } from "../../lib/io/files.ts";
     import { faFromJff, faToJff } from "../../lib/io/jff.ts";
     import { withBase } from "../../lib/paths.ts";
+    import { tooltip } from "../../lib/ui/tooltip.ts";
     import GraphCanvas from "../editor/GraphCanvas.svelte";
     import Dropdown, { type DropdownItem } from "../ui/Dropdown.svelte";
     import BatchPanel from "./BatchPanel.svelte";
@@ -204,10 +205,10 @@
             <Dropdown label="Datei" items={fileItems}/>
             <Dropdown label="Beispiele" items={exampleItems}/>
             <span class="divider"></span>
-            <button class="icon-button" onclick={() => editor.undo()} disabled={!editor.canUndo} title="Rückgängig (Strg+Z)" aria-label="Rückgängig">
+            <button class="icon-button" onclick={() => editor.undo()} disabled={!editor.canUndo} aria-label="Rückgängig" {@attach tooltip("Rückgängig (Strg+Z)")}>
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5M4 9h10a6 6 0 0 1 0 12h-3"/></svg>
             </button>
-            <button class="icon-button" onclick={() => editor.redo()} disabled={!editor.canRedo} title="Wiederholen (Strg+Y)" aria-label="Wiederholen">
+            <button class="icon-button" onclick={() => editor.redo()} disabled={!editor.canRedo} aria-label="Wiederholen" {@attach tooltip("Wiederholen (Strg+Y)")}>
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 14 5-5-5-5m5 5H10a6 6 0 0 0 0 12h3"/></svg>
             </button>
             <button class="button primary" onclick={() => definitionDialog?.open()}>Formale Definition</button>
@@ -221,7 +222,7 @@
                     class="icon-button"
                     class:active={editor.tool === tool.id}
                     aria-pressed={editor.tool === tool.id}
-                    title="{tool.label} ({tool.key})"
+                    {@attach tooltip(`${tool.label} (${tool.key})`, "right")}
                     aria-label={tool.label}
                     onclick={() => (editor.tool = tool.id)}
                 >
@@ -229,20 +230,20 @@
                 </button>
             {/each}
             <span class="divider"></span>
-            <button class="icon-button" onclick={() => canvas?.zoom(1.2)} title="Vergrößern" aria-label="Vergrößern">
+            <button class="icon-button" onclick={() => canvas?.zoom(1.2)} aria-label="Vergrößern" {@attach tooltip("Vergrößern", "right")}>
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5a6 6 0 1 0 0 12 6 6 0 0 0 0-12zm9 15-4.7-4.7M11 8v6m-3-3h6"/></svg>
             </button>
-            <button class="icon-button" onclick={() => canvas?.zoom(1 / 1.2)} title="Verkleinern" aria-label="Verkleinern">
+            <button class="icon-button" onclick={() => canvas?.zoom(1 / 1.2)} aria-label="Verkleinern" {@attach tooltip("Verkleinern", "right")}>
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5a6 6 0 1 0 0 12 6 6 0 0 0 0-12zm9 15-4.7-4.7M8 11h6"/></svg>
             </button>
-            <button class="icon-button" onclick={() => canvas?.fit()} title="Ansicht anpassen (F)" aria-label="Ansicht anpassen">
+            <button class="icon-button" onclick={() => canvas?.fit()} aria-label="Ansicht anpassen" {@attach tooltip("Ansicht anpassen (F)", "right")}>
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5m6 0h5v5m0 6v5h-5m-6 0H4v-5"/></svg>
             </button>
             <button
                 class="icon-button"
                 onclick={() => canvas?.arrange()}
                 disabled={editor.machine.states.length === 0}
-                title="Automatisch anordnen (A)"
+                {@attach tooltip("Automatisch anordnen (A)", "right")}
                 aria-label="Automatisch anordnen"
             >
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5h5v5H4zm11-6h5v5h-5zm0 12h5v5h-5zM9 12h3m0-6.5v13M12 6h3m-3 12h3"/></svg>

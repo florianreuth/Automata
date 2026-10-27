@@ -10,6 +10,7 @@
     import { missingTransitions, simulate, stepTransitions } from "../../lib/automata/fa/simulate.ts";
     import { naturalCompare } from "../../lib/automata/machine.ts";
     import { edgeKey } from "../../lib/graph/geometry.ts";
+    import { tooltip } from "../../lib/ui/tooltip.ts";
 
     interface Props {
         fa: FiniteAutomaton;
@@ -94,11 +95,11 @@
 
     <div class="controls">
         {#if running}
-            <button class="button" onclick={() => (step = 0)} disabled={step === 0} title="Zum Anfang">⏮</button>
-            <button class="button" onclick={() => step--} disabled={step === 0} title="Schritt zurück">◀</button>
-            <button class="button primary" onclick={() => step++} disabled={finished} title="Nächster Schritt">Schritt ▶</button>
-            <button class="button" onclick={() => (step = result.input.length)} disabled={finished} title="Bis zum Ende">⏭</button>
-            <button class="button" onclick={stop} title="Simulation beenden">✕</button>
+            <button class="button" onclick={() => (step = 0)} disabled={step === 0} aria-label="Zum Anfang" {@attach tooltip("Zum Anfang")}>⏮</button>
+            <button class="button" onclick={() => step--} disabled={step === 0} aria-label="Schritt zurück" {@attach tooltip("Schritt zurück")}>◀</button>
+            <button class="button primary" onclick={() => step++} disabled={finished} {@attach tooltip("Nächster Schritt")}>Schritt ▶</button>
+            <button class="button" onclick={() => (step = result.input.length)} disabled={finished} aria-label="Bis zum Ende" {@attach tooltip("Bis zum Ende")}>⏭</button>
+            <button class="button" onclick={stop} aria-label="Simulation beenden" {@attach tooltip("Simulation beenden")}>✕</button>
         {:else}
             <button class="button primary wide" onclick={start} disabled={!hasInitial}>Simulation starten</button>
         {/if}

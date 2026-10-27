@@ -19,6 +19,7 @@
     import { renderMachineSvg } from "../../lib/graph/svg.ts";
     import { downloadFile, fileBaseName, svgToPng } from "../../lib/io/files.ts";
     import { escapeMarkup } from "../../lib/markup.ts";
+    import { tooltip } from "../../lib/ui/tooltip.ts";
 
     interface Props {
         editor: FaEditor;
@@ -101,7 +102,7 @@
 <dialog bind:this={dialog} class="dialog" aria-labelledby="definition-heading" onclick={(event) => event.target === dialog && dialog?.close()}>
     <header>
         <h2 id="definition-heading">Formale Definition</h2>
-        <button class="icon-button" onclick={() => dialog?.close()} aria-label="Schließen">✕</button>
+        <button class="icon-button" onclick={() => dialog?.close()} aria-label="Schließen" {@attach tooltip("Schließen")}>✕</button>
     </header>
 
     <div class="options">

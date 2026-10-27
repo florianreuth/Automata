@@ -161,6 +161,24 @@ body {
     color: var(--on-accent);
 }
 
+.tooltip {
+    position: fixed;
+    inset: auto;
+    max-width: 16rem;
+    margin: 0;
+    padding: 4px 8px;
+    border: 0;
+    border-radius: 6px;
+    background: var(--ink);
+    color: var(--bg);
+    font-size: 0.75rem;
+    font-weight: 550;
+    line-height: 1.4;
+    white-space: nowrap;
+    box-shadow: var(--shadow);
+    pointer-events: none;
+}
+
 .field {
     display: grid;
     gap: 4px;
