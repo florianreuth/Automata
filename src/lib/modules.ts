@@ -8,7 +8,7 @@ export interface Module {
     id: string;
     title: string;
     description: string;
-    /** Route of the editor; only set once the module is available. */
+    /** Route of the editor without the site base; only set once the module is available. */
     href?: string;
     features: string[];
 }

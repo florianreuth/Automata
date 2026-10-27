@@ -7,6 +7,7 @@
 import Footer from "../components/Footer.astro";
 import Base from "../layouts/Base.astro";
 import { modules } from "../lib/modules";
+import { withBase } from "../lib/paths";
 
 const available = modules.filter((module) => module.href);
 ---
@@ -20,7 +21,7 @@ const available = modules.filter((module) => module.href);
                 Automaten zeichnen, Wörter Schritt für Schritt simulieren und Konstruktionsbeweise nachvollziehen –
                 eine moderne Werkbank im Geiste von JFLAP, direkt im Browser.
             </p>
-            <a class="button primary cta" href="/endlicher-automat">Endlichen Automaten öffnen</a>
+            <a class="button primary cta" href={withBase("/endlicher-automat")}>Endlichen Automaten öffnen</a>
         </header>
 
         <section aria-labelledby="modules-heading">
@@ -28,7 +29,7 @@ const available = modules.filter((module) => module.href);
             <ul class="modules">
                 {available.map((module) => (
                     <li class="module">
-                        <h3><a href={module.href}>{module.title}</a></h3>
+                        <h3><a href={withBase(module.href!)}>{module.title}</a></h3>
                         <p>{module.description}</p>
                         <ul class="features">
                             {module.features.map((feature) => <li>{feature}</li>)}

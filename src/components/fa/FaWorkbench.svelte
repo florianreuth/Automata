@@ -17,6 +17,7 @@
     import { faFromJson, faToJson } from "../../lib/io/document.ts";
     import { downloadFile, fileBaseName, pickTextFile, svgToPng } from "../../lib/io/files.ts";
     import { faFromJff, faToJff } from "../../lib/io/jff.ts";
+    import { withBase } from "../../lib/paths.ts";
     import GraphCanvas from "../editor/GraphCanvas.svelte";
     import Dropdown, { type DropdownItem } from "../ui/Dropdown.svelte";
     import BatchPanel from "./BatchPanel.svelte";
@@ -188,7 +189,7 @@
 
 <div class="workbench">
     <header class="topbar">
-        <a class="brand" href="/" aria-label="Zur Startseite">
+        <a class="brand" href={withBase("/")} aria-label="Zur Startseite">
             <svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="9" cy="16" r="6"/><circle cx="23" cy="16" r="6"/><circle cx="23" cy="16" r="3.5"/><path d="M15 16h2"/></svg>
             <span>Automata</span>
         </a>
