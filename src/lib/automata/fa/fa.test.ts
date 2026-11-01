@@ -5,12 +5,12 @@
 
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { toDfa } from "./convert.ts";
+import { minimizeDfa, toDfa } from "./convert.ts";
 import { definitionToLatex, definitionToText } from "./definition-export.ts";
 import { formalDefinition, transitionSignature } from "./definition.ts";
 import { faExamples } from "./examples.ts";
 import { layeredLayout } from "../../graph/layout.ts";
-import { isComplete, isDeterministic, parseSymbols, unreachableStates } from "./model.ts";
+import { createFiniteAutomaton, isComplete, isDeterministic, parseSymbols, unreachableStates } from "./model.ts";
 import { blockedStep, missingTransitions, simulate, stepTransitions } from "./simulate.ts";
 
 const example = (id: string) => faExamples.find((e) => e.id === id)!.create();
@@ -73,6 +73,40 @@ describe("toDfa", () => {
                 assert.equal(simulate(dfa, word).accepted, simulate(nfa, word).accepted, `${nfa.title}: ${word}`);
             }
         }
+    });
+});
+
+describe("minimizeDfa", () => {
+    const words = ["", "0", "1", "01", "101", "-1", "-0", "ab", "ba", "aab", "0011", "abab", "1101"];
+
+    it("produces an equivalent complete DFA that cannot shrink further", () => {
+        for (const { create } of faExamples) {
+            const fa = create();
+            const minimal = minimizeDfa(fa);
+            assert.equal(isComplete(minimal), true);
+            assert.equal(minimizeDfa(minimal).states.length, minimal.states.length, fa.title);
+            assert.ok(minimal.states.length <= toDfa(fa).states.length, fa.title);
+            for (const word of words) {
+                assert.equal(simulate(minimal, word).accepted, simulate(fa, word).accepted, `${fa.title}: ${word}`);
+            }
+        }
+        assert.equal(minimizeDfa(example("ends-with-01")).states.length, 3);
+    });
+
+    it("merges equivalent states, drops unreachable ones and adds a trap state", () => {
+        const fa = createFiniteAutomaton();
+        const state = (name: string, initial = false, final = false) => ({ id: name, name, x: 0, y: 0, initial, final });
+        fa.states = [state("q0", true), state("q1"), state("q2"), state("q3", false, true), state("q4", false, true)];
+        fa.transitions = [
+            ["q0", "q1", "a"], ["q0", "q2", "b"], ["q1", "q3", "a"], ["q1", "q3", "b"], ["q2", "q3", "a"], ["q2", "q3", "b"], ["q4", "q0", "a"],
+        ].map(([from, to, symbol], i) => ({ id: `t${i}`, from, to, symbol }));
+        const minimal = minimizeDfa(fa);
+        assert.deepEqual(minimal.states.map((s) => s.label), ["{q0}", "{q1, q2}", "{q3}", "∅"]);
+        assert.deepEqual(minimal.states.map((s) => s.final), [false, false, true, false]);
+    });
+
+    it("rejects automata without an initial state", () => {
+        assert.throws(() => minimizeDfa(createFiniteAutomaton()), /Startzustand/);
     });
 });
 

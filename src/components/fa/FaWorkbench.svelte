@@ -7,7 +7,7 @@
 
 <script lang="ts">
     import { onMount, tick } from "svelte";
-    import { toDfa } from "../../lib/automata/fa/convert.ts";
+    import { minimizeDfa, toDfa } from "../../lib/automata/fa/convert.ts";
     import { faExamples } from "../../lib/automata/fa/examples.ts";
     import { createFiniteAutomaton, type FaTransition, type FiniteAutomaton } from "../../lib/automata/fa/model.ts";
     import { FaEditor } from "../../lib/editor/fa-editor.svelte.ts";
@@ -132,15 +132,19 @@
         }
     }
 
-    async function convertToDfa() {
+    async function replaceWith(convert: (fa: FiniteAutomaton) => FiniteAutomaton, message: (before: number, after: number) => string) {
         try {
-            const dfa = toDfa(editor.snapshot());
-            await load(dfa);
-            toast.show(`In einen DEA mit ${dfa.states.length} Zuständen umgewandelt.`);
+            const before = editor.machine.states.length;
+            const result = convert(editor.snapshot());
+            await load(result);
+            toast.show(message(before, result.states.length));
         } catch (error) {
             toast.show(error instanceof Error ? error.message : "Die Umwandlung ist fehlgeschlagen.");
         }
     }
+
+    const convertToDfa = () => replaceWith(toDfa, (_, after) => `In einen DEA mit ${after} Zuständen umgewandelt.`);
+    const minimize = () => replaceWith(minimizeDfa, (before, after) => `Minimal-DEA mit ${after} Zuständen erzeugt (vorher ${before}).`);
 
     function onKeyDown(event: KeyboardEvent) {
         // Typing in fields and dialogs must not trigger editor shortcuts.
@@ -215,7 +219,7 @@
                 {:else if tab === "batch"}
                     <BatchPanel fa={editor.machine}/>
                 {:else}
-                    <PropertiesPanel fa={editor.machine} onconvert={convertToDfa}/>
+                    <PropertiesPanel fa={editor.machine} onconvert={convertToDfa} onminimize={minimize}/>
                 {/if}
             </div>
         </aside>

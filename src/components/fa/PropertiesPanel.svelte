@@ -15,9 +15,10 @@
     interface Props {
         fa: FiniteAutomaton;
         onconvert: () => void;
+        onminimize: () => void;
     }
 
-    let { fa, onconvert }: Props = $props();
+    let { fa, onconvert, onminimize }: Props = $props();
 
     const deterministic = $derived(isDeterministic(fa));
     const complete = $derived(isComplete(fa));
@@ -71,7 +72,8 @@
 
     <h3>Umwandlungen</h3>
     <button class="button primary wide" onclick={onconvert} disabled={!initial}>NEA → DEA (Potenzmengenkonstruktion)</button>
-    <p class="hint">Das Ergebnis ersetzt den aktuellen Automaten und lässt sich mit Strg+Z rückgängig machen.</p>
+    <button class="button wide" onclick={onminimize} disabled={!initial}>EA → Minimal-DEA (Zustandsminimierung)</button>
+    <p class="hint">Beide Umwandlungen ersetzen den aktuellen Automaten und lassen sich mit Strg+Z rückgängig machen.</p>
     <button class="button wide" onclick={() => (showRegex = !showRegex)} disabled={!initial} aria-expanded={showRegex}>EA → RA (Zustandselimination)</button>
     {#if regex !== null}
         <p class="mono regex">{regex}</p>

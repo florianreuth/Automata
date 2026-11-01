@@ -11,7 +11,7 @@ Built with [Astro](https://astro.build), [Svelte](https://svelte.dev) and TypeSc
 
 - Graph editor with automatic layout, undo/redo and autosave
 - Step-by-step simulation and batch testing of many words
-- Analysis (determinism, completeness, unreachable states), NFA → DFA and FA → regular expression
+- Analysis (determinism, completeness, unreachable states), NFA → DFA, DFA minimization and FA → regular expression
 - Formal definition `A = (Q, Σ, δ, q0, F)`, exportable as text, Markdown, LaTeX, SVG, PNG and PDF
 - JSON documents and JFLAP `.jff` import/export
 
@@ -26,7 +26,7 @@ tree. Type `->` for `→`; an empty alternative means ε.
 
 ![Grammars and parsing](docs/screenshots/grammar.png)
 
-Planned: minimal DFA, regular grammar ↔ FA, SLR(1) and brute-force parsing, pushdown automata, Turing machines and
+Planned: regular grammar ↔ FA, SLR(1) and brute-force parsing, pushdown automata, Turing machines and
 L-systems.
 
 ### Keyboard shortcuts (automaton editor)
