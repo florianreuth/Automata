@@ -50,9 +50,28 @@ export function move(fa: FiniteAutomaton, states: ReadonlySet<string>, symbol: s
     return result;
 }
 
-/** Runs the automaton on a word by tracking all active states at once; every character is one symbol. */
+/**
+ * Splits a word into symbols: at whitespace if it contains any, otherwise greedily by the longest alphabet symbol.
+ * Characters that start no alphabet symbol become single (unknown) symbols.
+ */
+export function tokenizeWord(word: string, alphabet: readonly string[]): string[] {
+    if (/\s/.test(word)) {
+        return word.split(/\s+/).filter((part) => part.length > 0);
+    }
+    const longestFirst = [...alphabet].sort((a, b) => b.length - a.length);
+    const symbols: string[] = [];
+    for (let i = 0; i < word.length; ) {
+        const symbol = longestFirst.find((candidate) => word.startsWith(candidate, i)) ?? String.fromCodePoint(word.codePointAt(i)!);
+        symbols.push(symbol);
+        i += symbol.length;
+    }
+    return symbols;
+}
+
+/** Runs the automaton on a word, split by {@link tokenizeWord}, by tracking all active states at once. */
 export function simulate(fa: FiniteAutomaton, word: string): SimulationResult {
-    const input = [...word];
+    const alphabet = alphabetOf(fa);
+    const input = tokenizeWord(word, alphabet);
     const initial = initialStateOf(fa);
     let current = initial ? epsilonClosure(fa, [initial.id]) : new Set<string>();
     const steps: SimulationStep[] = [{ position: 0, states: current }];
@@ -61,12 +80,11 @@ export function simulate(fa: FiniteAutomaton, word: string): SimulationResult {
         steps.push({ position: i + 1, states: current });
     }
     const finals = new Set(fa.states.filter((state) => state.final).map((state) => state.id));
-    const alphabet = new Set(alphabetOf(fa));
     return {
         input,
         steps,
         accepted: [...current].some((id) => finals.has(id)),
-        unknownSymbols: [...new Set(input.filter((symbol) => !alphabet.has(symbol)))],
+        unknownSymbols: [...new Set(input.filter((symbol) => !alphabet.includes(symbol)))],
     };
 }
 

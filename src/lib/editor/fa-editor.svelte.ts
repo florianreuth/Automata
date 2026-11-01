@@ -16,7 +16,7 @@ export class FaEditor implements GraphEditor<FaTransition> {
     machine = $state<FiniteAutomaton>(createFiniteAutomaton());
     tool = $state<Tool>("select");
     selection = $state<Selection>(null);
-    readonly edgeHint = "z. B. 0, 1 – leer für ε";
+    readonly edgeHint = "z. B. 0, 1, hallo – leer für ε";
 
     #undo = $state<FiniteAutomaton[]>([]);
     #redo = $state<FiniteAutomaton[]>([]);
@@ -172,16 +172,13 @@ export class FaEditor implements GraphEditor<FaTransition> {
     }
 
     applyEdgeText(from: string, to: string, text: string): string | null {
-        const parsed = parseSymbols(text);
-        if ("error" in parsed) {
-            return parsed.error;
-        }
+        const symbols = parseSymbols(text);
         const existing = this.machine.transitions.filter((t) => t.from === from && t.to === to);
-        const unchanged = existing.length === parsed.symbols.length && existing.every((t) => parsed.symbols.includes(t.symbol));
+        const unchanged = existing.length === symbols.length && existing.every((t) => symbols.includes(t.symbol));
         if (!unchanged) {
             this.#change(() => {
                 const others = this.machine.transitions.filter((t) => t.from !== from || t.to !== to);
-                const created = [...parsed.symbols].sort(compareSymbols).map((symbol) => ({ id: createId(), from, to, symbol }));
+                const created = symbols.sort(compareSymbols).map((symbol) => ({ id: createId(), from, to, symbol }));
                 this.machine.transitions = [...others, ...created];
             });
         }

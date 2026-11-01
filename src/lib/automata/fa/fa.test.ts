@@ -11,7 +11,7 @@ import { formalDefinition, transitionSignature } from "./definition.ts";
 import { faExamples } from "./examples.ts";
 import { layeredLayout } from "../../graph/layout.ts";
 import { createFiniteAutomaton, isComplete, isDeterministic, parseSymbols, unreachableStates } from "./model.ts";
-import { blockedStep, missingTransitions, simulate, stepTransitions } from "./simulate.ts";
+import { blockedStep, missingTransitions, simulate, stepTransitions, tokenizeWord } from "./simulate.ts";
 
 const example = (id: string) => faExamples.find((e) => e.id === id)!.create();
 
@@ -132,10 +132,35 @@ describe("formalDefinition", () => {
 });
 
 describe("parseSymbols", () => {
-    it("splits labels and maps ε", () => {
-        assert.deepEqual(parseSymbols("0, 1 ε"), { symbols: ["0", "1", ""] });
-        assert.deepEqual(parseSymbols(""), { symbols: [""] });
-        assert.ok("error" in parseSymbols("ab"));
+    it("splits labels, keeps multi-character symbols and maps ε", () => {
+        assert.deepEqual(parseSymbols("0, 1 ε"), ["0", "1", ""]);
+        assert.deepEqual(parseSymbols(""), [""]);
+        assert.deepEqual(parseSymbols("hallo, welt, hallo"), ["hallo", "welt"]);
+    });
+});
+
+describe("tokenizeWord", () => {
+    const alphabet = ["a", "hallo", "hal", "welt"];
+
+    it("splits at whitespace if present, otherwise by the longest alphabet symbol", () => {
+        assert.deepEqual(tokenizeWord("hallo  welt", alphabet), ["hallo", "welt"]);
+        assert.deepEqual(tokenizeWord("hallowelta", alphabet), ["hallo", "welt", "a"]);
+        assert.deepEqual(tokenizeWord("halx", alphabet), ["hal", "x"]);
+        assert.deepEqual(tokenizeWord("0101", ["0", "1"]), ["0", "1", "0", "1"]);
+        assert.deepEqual(tokenizeWord("", alphabet), []);
+    });
+
+    it("lets automata read words as symbols", () => {
+        const fa = createFiniteAutomaton();
+        fa.states = [
+            { id: "s", name: "q0", x: 0, y: 0, initial: true, final: false },
+            { id: "f", name: "q1", x: 0, y: 0, initial: false, final: true },
+        ];
+        fa.transitions = [{ id: "t0", from: "s", to: "s", symbol: "hallo" }, { id: "t1", from: "s", to: "f", symbol: "welt" }];
+        assert.equal(simulate(fa, "hallo hallo welt").accepted, true);
+        assert.equal(simulate(fa, "hallowelt").accepted, true);
+        assert.deepEqual(simulate(fa, "hallo welt!").unknownSymbols, ["welt!"]);
+        assert.equal(minimizeDfa(fa).states.length, 3);
     });
 });
 

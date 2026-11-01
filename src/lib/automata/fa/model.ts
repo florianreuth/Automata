@@ -78,23 +78,17 @@ export function displaySymbol(symbol: string): string {
     return symbol === "" ? EPSILON : symbol;
 }
 
-/** Parses an edge label such as "0, 1, ε" into distinct stored symbols, or returns a German error message. */
-export function parseSymbols(input: string): { symbols: string[] } | { error: string } {
+/** Parses an edge label such as "0, 1, hallo, ε" into distinct stored symbols; an empty label is ε. */
+export function parseSymbols(input: string): string[] {
     const parts = input.split(/[,\s]+/).filter((part) => part.length > 0);
     if (parts.length === 0) {
-        return { symbols: [""] };
+        return [""];
     }
     const symbols = new Set<string>();
     for (const part of parts) {
-        if (part === EPSILON || part === "λ" || part.toLowerCase() === "eps") {
-            symbols.add("");
-        } else if ([...part].length === 1) {
-            symbols.add(part);
-        } else {
-            return { error: `„${part}“ ist kein einzelnes Zeichen. Mehrere Symbole mit Komma trennen.` };
-        }
+        symbols.add(part === EPSILON || part === "λ" || part.toLowerCase() === "eps" ? "" : part);
     }
-    return { symbols: [...symbols] };
+    return [...symbols];
 }
 
 /** Formats stored symbols as an edge label such as "0, 1, ε". */

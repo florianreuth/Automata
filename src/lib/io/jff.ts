@@ -76,9 +76,6 @@ export function faFromJff(xml: string, title: string): FiniteAutomaton {
         if (!from || !to) {
             throw new Error("Ein Übergang verweist auf einen unbekannten Zustand.");
         }
-        if ([...symbol].length > 1) {
-            throw new Error(`Übergänge mit mehreren Zeichen („${symbol}“) werden nicht unterstützt.`);
-        }
         return { id: createId(), from, to, symbol };
     });
     return { kind: "fa", title, states, transitions };

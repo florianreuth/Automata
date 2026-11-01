@@ -115,7 +115,7 @@
 
         <dl class="facts">
             <dt>Gelesen</dt>
-            <dd>{step} von {result.input.length} Zeichen</dd>
+            <dd>{step} von {result.input.length} Symbolen</dd>
             <dt>Aktive Zustände</dt>
             <dd>
                 {#if stuck}
@@ -141,7 +141,7 @@
         {/if}
     {:else if input.length > 0 || hasInitial}
         <p class="verdict" class:accepted={result.accepted} class:rejected={!result.accepted}>
-            „{input === "" ? "ε" : input}“ wird {result.accepted ? "akzeptiert" : "abgelehnt"}{#if blocked}{" "}– beim {blocked.position}. Zeichen „{blocked.symbol}“ fehlt ein Übergang aus <span class="mono">{blocked.from}</span>{/if}.
+            „{input === "" ? "ε" : input}“ wird {result.accepted ? "akzeptiert" : "abgelehnt"}{#if blocked}{" "}– beim {blocked.position}. Symbol „{blocked.symbol}“ fehlt ein Übergang aus <span class="mono">{blocked.from}</span>{/if}.
         </p>
     {/if}
 </section>

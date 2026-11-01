@@ -98,8 +98,12 @@ function format(regex: Regex, context: number): string {
             return EMPTY_SET;
         case "epsilon":
             return EPSILON;
-        case "symbol":
-            return RESERVED.has(regex.symbol) ? `\\${regex.symbol}` : regex.symbol;
+        case "symbol": {
+            const characters = [...regex.symbol];
+            const text = characters.map((character) => (RESERVED.has(character) ? `\\${character}` : character)).join("");
+            // Read back as a regex, a multi-character symbol is a concatenation, so a postfix operator must cover all of it.
+            return characters.length > 1 && context > Precedence.Concat ? `(${text})` : text;
+        }
         case "union": {
             const text = regex.items.map((item) => format(item, Precedence.Union)).join("|");
             return context > Precedence.Union ? `(${text})` : text;

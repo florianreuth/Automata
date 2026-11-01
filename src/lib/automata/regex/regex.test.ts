@@ -37,6 +37,10 @@ describe("simplification", () => {
         assert.equal(formatRegex(star(star(parseRegex("a+")))), "a*");
         assert.equal(formatRegex(union(parseRegex("ε"), parseRegex("a*"))), "a*");
     });
+
+    it("groups multi-character symbols under postfix operators", () => {
+        assert.equal(formatRegex(concat(star(symbol("hallo")), union(symbol("welt"), symbol("a|b")))), "(hallo)*(welt|a\\|b)");
+    });
 });
 
 describe("regexToNfa", () => {

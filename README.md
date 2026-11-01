@@ -9,6 +9,9 @@ Built with [Astro](https://astro.build), [Svelte](https://svelte.dev) and TypeSc
 
 **Finite automata** (NFA/DFA) with ε-transitions:
 
+- Symbols can be single characters or whole words such as `hallo`. Input words are split at spaces (`hallo welt`), or,
+  without spaces, by the longest matching alphabet symbol (`hallowelt`)
+
 - Graph editor with automatic layout, undo/redo and autosave
 - Step-by-step simulation and batch testing of many words
 - Analysis (determinism, completeness, unreachable states), NFA → DFA, DFA minimization and FA → regular expression
