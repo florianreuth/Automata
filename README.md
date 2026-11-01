@@ -3,7 +3,7 @@
 A modern, browser-based workbench for formal languages and automata theory, inspired by [JFLAP](https://www.jflap.org).
 Built with [Astro](https://astro.build), [Svelte](https://svelte.dev) and TypeScript. The user interface is in German.
 
-![Start page](docs/screenshots/home.png)
+![Start page](.github/images/home.png)
 
 ## Features
 
@@ -11,23 +11,22 @@ Built with [Astro](https://astro.build), [Svelte](https://svelte.dev) and TypeSc
 
 - Symbols can be single characters or whole words such as `hallo`. Input words are split at spaces (`hallo welt`), or,
   without spaces, by the longest matching alphabet symbol (`hallowelt`)
-
 - Graph editor with automatic layout, undo/redo and autosave
 - Step-by-step simulation and batch testing of many words
 - Analysis (determinism, completeness, unreachable states), NFA → DFA, DFA minimization and FA → regular expression
 - Formal definition `A = (Q, Σ, δ, q0, F)`, exportable as text, Markdown, LaTeX, SVG, PNG and PDF
 - JSON documents and JFLAP `.jff` import/export
 
-![Finite automaton editor](docs/screenshots/finite-automaton.png)
+![Finite automaton editor](.github/images/finite-automaton.png)
 
 **Regular expressions**: batch testing and conversion to an ε-NFA (Thompson construction).
 
-![Regular expressions](docs/screenshots/regular-expression.png)
+![Regular expressions](.github/images/regular-expression.png)
 
 **Grammars**: Chomsky classification, Chomsky normal form, CYK, FIRST/FOLLOW sets and LL(1) parsing with derivation
 tree. Type `->` for `→`; an empty alternative means ε.
 
-![Grammars and parsing](docs/screenshots/grammar.png)
+![Grammars and parsing](.github/images/grammar.png)
 
 Planned: regular grammar ↔ FA, SLR(1) and brute-force parsing, pushdown automata, Turing machines and
 L-systems.
