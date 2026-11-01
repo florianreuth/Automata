@@ -17,7 +17,7 @@
         initialWords?: string;
     }
 
-    let { fa, initialWords = "ε\n0\n1\n-101\n-0\n01" }: Props = $props();
+    let { fa, initialWords = "" }: Props = $props();
 
     let words = $state(untrack(() => initialWords));
 

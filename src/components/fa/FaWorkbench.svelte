@@ -36,7 +36,7 @@
 
     const AUTOSAVE_KEY = "automata:fa:autosave";
 
-    const editor = new FaEditor(loadAutosave(AUTOSAVE_KEY, faFromJson) ?? faExamples[0].create());
+    const editor = new FaEditor(loadAutosave(AUTOSAVE_KEY, faFromJson) ?? createFiniteAutomaton());
     const toast = new Toast();
 
     let canvas: ReturnType<typeof GraphCanvas<FaTransition>> | undefined = $state();
