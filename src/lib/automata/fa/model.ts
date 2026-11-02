@@ -84,11 +84,7 @@ export function parseSymbols(input: string): string[] {
     if (parts.length === 0) {
         return [""];
     }
-    const symbols = new Set<string>();
-    for (const part of parts) {
-        symbols.add(part === EPSILON || part === "λ" || part.toLowerCase() === "eps" ? "" : part);
-    }
-    return [...symbols];
+    return [...new Set(parts.map((part) => (part === EPSILON || part === "λ" || part.toLowerCase() === "eps" ? "" : part)))];
 }
 
 /** Formats stored symbols as an edge label such as "0, 1, ε". */
@@ -96,7 +92,6 @@ export function formatSymbols(symbols: readonly string[]): string {
     return [...symbols].sort(compareSymbols).map(displaySymbol).join(", ");
 }
 
-/** Label of an edge that combines the given transitions, e.g. "0, 1, ε". */
 export function transitionLabel(transitions: readonly FaTransition[]): string {
     return formatSymbols(transitions.map((t) => t.symbol));
 }
