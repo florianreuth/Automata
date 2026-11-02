@@ -18,7 +18,6 @@ export interface EdgeGroup<T extends Edge = Edge> {
     transitions: T[];
 }
 
-/** Precomputed drawing data of an edge group. */
 export interface EdgeShape {
     path: string;
     labelX: number;
@@ -26,7 +25,6 @@ export interface EdgeShape {
     labelAnchor: "start" | "middle" | "end";
 }
 
-/** Identifies the arrow from one state to another, see {@link EdgeGroup.key}. */
 export function edgeKey(from: string, to: string): string {
     return `${from}>${to}`;
 }
@@ -85,10 +83,7 @@ function groupEdges<T extends Edge>(transitions: readonly T[]): EdgeGroup<T>[] {
     return [...groups.values()];
 }
 
-/**
- * Signed offset of the curve apex from the straight line, 0 for a straight edge. Edges with a reverse
- * counterpart bend so both stay visible, straight edges that would cross another state bend around it.
- */
+/** Signed offset of the curve apex from the straight line; bends reverse pairs apart and edges around states in the way. */
 function edgeBend(from: StateNode, to: StateNode, hasReverse: boolean, states: readonly StateNode[]): number {
     const dx = to.x - from.x;
     const dy = to.y - from.y;
@@ -119,12 +114,12 @@ function edgeBend(from: StateNode, to: StateNode, hasReverse: boolean, states: r
 
 /** Computes the arrow of an edge group from a {@link edgeBend} offset; loopDirection (radians) only applies to self-loops. */
 function edgeShape(from: Point, to: Point, bend: number, loopDirection = UP): EdgeShape {
-    if (Math.hypot(to.x - from.x, to.y - from.y) < 1) {
-        return loopShape(from, loopDirection);
-    }
     const dx = to.x - from.x;
     const dy = to.y - from.y;
     const length = Math.hypot(dx, dy);
+    if (length < 1) {
+        return loopShape(from, loopDirection);
+    }
     const normal = { x: dy / length, y: -dx / length };
     if (bend === 0) {
         const start = along(from, to, STATE_RADIUS);
