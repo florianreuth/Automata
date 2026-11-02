@@ -15,6 +15,7 @@
     import { renderMachineSvg } from "../../lib/graph/svg.ts";
     import { handOffAutomaton } from "../../lib/io/handoff.ts";
     import { withBase } from "../../lib/paths.ts";
+    import { measureText } from "../../lib/ui/measure.ts";
     import BatchPanel from "../fa/BatchPanel.svelte";
     import Dropdown, { type DropdownItem } from "../ui/Dropdown.svelte";
     import SymbolBar from "../ui/SymbolBar.svelte";
@@ -39,7 +40,7 @@
         }
     });
     const nfa = $derived("regex" in parsed ? regexToNfa(parsed.regex, `NEA zu ${source.trim() || "ε"}`) : null);
-    const svg = $derived(nfa ? renderMachineSvg(nfa, (group) => transitionLabel(group.transitions)) : "");
+    const svg = $derived(nfa ? renderMachineSvg(nfa, (group) => transitionLabel(group.transitions), measureText) : "");
     const alphabet = $derived(nfa ? alphabetOf(nfa) : []);
 
     const exampleItems: DropdownItem[] = regexExamples.map((example) => ({

@@ -12,6 +12,9 @@ export const NAME_BASELINE = 5;
 export const LABEL_BASELINE = STATE_RADIUS + 18;
 /** Distance from a state's edge to the far end of its self-loop. */
 export const LOOP_HEIGHT = 58;
+export const EDGE_LABEL_SIZE = 15;
+// Half of the white halo stroke drawn behind edge labels.
+const LABEL_HALO = 3;
 // Hits slightly outside the circle still count, the stroke is part of the state.
 const HIT_TOLERANCE = 2;
 
@@ -25,6 +28,15 @@ export interface Box {
     y: number;
     width: number;
     height: number;
+}
+
+export type MeasureText = (text: string, font: string) => number;
+
+export interface TextLabel {
+    x: number;
+    y: number;
+    anchor: "start" | "middle" | "end";
+    width: number;
 }
 
 /** Topmost state whose circle contains the point, null if there is none. */
@@ -43,7 +55,7 @@ export function initialArrowPath(center: Point): string {
 }
 
 /** Bounding box of all drawn elements including loops, labels and the initial arrow, grown by margin on every side. */
-export function graphBounds(states: readonly StateNode[], loops: ReadonlyMap<string, number>, margin = 24): Box {
+export function graphBounds(states: readonly StateNode[], loops: ReadonlyMap<string, number>, labels: readonly TextLabel[] = [], margin = 24): Box {
     if (states.length === 0) {
         return { x: 0, y: 0, width: 400, height: 240 };
     }
@@ -56,6 +68,11 @@ export function graphBounds(states: readonly StateNode[], loops: ReadonlyMap<str
             const reach = STATE_RADIUS + LOOP_HEIGHT + 24;
             points.push({ x: s.x + Math.cos(loop) * reach, y: s.y + Math.sin(loop) * reach });
         }
+    }
+    for (const label of labels) {
+        const left = label.x - (label.anchor === "start" ? 0 : label.anchor === "middle" ? label.width / 2 : label.width);
+        points.push({ x: left - LABEL_HALO, y: label.y - EDGE_LABEL_SIZE - LABEL_HALO });
+        points.push({ x: left + label.width + LABEL_HALO, y: label.y + EDGE_LABEL_SIZE / 3 + LABEL_HALO });
     }
     const minX = Math.min(...points.map((p) => p.x)) - margin;
     const maxX = Math.max(...points.map((p) => p.x)) + margin;

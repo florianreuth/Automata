@@ -11,6 +11,7 @@
     import type { FaEditor } from "../../lib/editor/fa-editor.svelte.ts";
     import { renderMachineSvg } from "../../lib/graph/svg.ts";
     import { downloadDocument, printHtml, svgToPng } from "../../lib/io/files.ts";
+    import { measureText } from "../../lib/ui/measure.ts";
     import { tooltip } from "../../lib/ui/tooltip.ts";
     import DefinitionSheet, { PRINT_CSS } from "./DefinitionSheet.svelte";
 
@@ -27,7 +28,7 @@
     let representation = $state<"table" | "graph" | "both">("table");
 
     const definition = $derived(formalDefinition(editor.machine, name.trim() || "A"));
-    const svg = $derived(renderMachineSvg(editor.machine, (group) => editor.edgeLabel(group)));
+    const svg = $derived(renderMachineSvg(editor.machine, (group) => editor.edgeLabel(group), measureText));
 
     export function open(): void {
         dialog?.showModal();

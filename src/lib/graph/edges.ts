@@ -4,7 +4,7 @@
 // Copyright (c) 2026 Florian Reuth <git@florianreuth.de>
 
 import type { Edge, StateNode } from "../automata/machine.ts";
-import { LOOP_HEIGHT, type Point, STATE_RADIUS } from "./geometry.ts";
+import { LOOP_HEIGHT, type Point, STATE_RADIUS, type TextLabel } from "./geometry.ts";
 
 const BEND = 26;
 const OBSTACLE_BEND = 44;
@@ -60,6 +60,13 @@ export class EdgeRouter<T extends Edge = Edge> {
             return null;
         }
         return edgeShape(a, b, edgeBend(a, b, from !== to && this.hasEdge(to, from), this.#states), this.loops.get(from));
+    }
+
+    labels(text: (group: EdgeGroup<T>) => string, measure: (text: string) => number): TextLabel[] {
+        return this.groups.flatMap((group) => {
+            const shape = this.shape(group.from, group.to);
+            return shape ? [{ x: shape.labelX, y: shape.labelY, anchor: shape.labelAnchor, width: measure(text(group)) }] : [];
+        });
     }
 }
 

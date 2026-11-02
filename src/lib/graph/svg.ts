@@ -6,7 +6,7 @@
 import type { Edge, Machine } from "../automata/machine.ts";
 import { escapeMarkup } from "../markup.ts";
 import { type EdgeGroup, EdgeRouter } from "./edges.ts";
-import { graphBounds, initialArrowPath, LABEL_BASELINE, NAME_BASELINE, STATE_RADIUS } from "./geometry.ts";
+import { EDGE_LABEL_SIZE, graphBounds, initialArrowPath, LABEL_BASELINE, type MeasureText, NAME_BASELINE, STATE_RADIUS } from "./geometry.ts";
 
 const INK = "#1a1b2e";
 const MUTED = "#5f6178";
@@ -14,9 +14,9 @@ const PAPER = "#ffffff";
 const FONT = "Geist, Inter, Helvetica, Arial, sans-serif";
 
 /** Renders a state graph as a standalone, print friendly SVG document with fixed light colors. */
-export function renderMachineSvg<T extends Edge>(machine: Machine<T>, edgeLabel: (group: EdgeGroup<T>) => string): string {
+export function renderMachineSvg<T extends Edge>(machine: Machine<T>, edgeLabel: (group: EdgeGroup<T>) => string, measure: MeasureText): string {
     const router = new EdgeRouter(machine.states, machine.transitions);
-    const box = graphBounds(machine.states, router.loops);
+    const box = graphBounds(machine.states, router.loops, router.labels(edgeLabel, (text) => measure(text, `${EDGE_LABEL_SIZE}px ${FONT}`)));
     const parts: string[] = [];
 
     parts.push(
@@ -31,7 +31,7 @@ export function renderMachineSvg<T extends Edge>(machine: Machine<T>, edgeLabel:
         }
         parts.push(
             `<path d="${shape.path}" fill="none" stroke="${INK}" stroke-width="1.6" marker-end="url(#arrow)"/>`,
-            `<text x="${shape.labelX}" y="${shape.labelY}" text-anchor="${shape.labelAnchor}" font-size="15" fill="${INK}" stroke="${PAPER}" stroke-width="5" paint-order="stroke">${escapeMarkup(edgeLabel(group))}</text>`,
+            `<text x="${shape.labelX}" y="${shape.labelY}" text-anchor="${shape.labelAnchor}" font-size="${EDGE_LABEL_SIZE}" fill="${INK}" stroke="${PAPER}" stroke-width="5" paint-order="stroke">${escapeMarkup(edgeLabel(group))}</text>`,
         );
     }
     for (const state of machine.states) {

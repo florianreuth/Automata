@@ -21,6 +21,7 @@
     import { takeHandedOffAutomaton } from "../../lib/io/handoff.ts";
     import { AUTOMATON_FILE_TYPES, faFromFile } from "../../lib/io/import.ts";
     import { faToJff } from "../../lib/io/jff.ts";
+    import { measureText } from "../../lib/ui/measure.ts";
     import { Toast } from "../../lib/ui/toast.svelte.ts";
     import { tooltip } from "../../lib/ui/tooltip.ts";
     import GraphCanvas from "../editor/GraphCanvas.svelte";
@@ -121,7 +122,7 @@
     }
 
     function diagramSvg() {
-        return renderMachineSvg(editor.machine, (group) => editor.edgeLabel(group));
+        return renderMachineSvg(editor.machine, (group) => editor.edgeLabel(group), measureText);
     }
 
     async function exportPng() {

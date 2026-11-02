@@ -11,7 +11,8 @@
     import { type Hit, pointerAction } from "../../lib/editor/pointer.ts";
     import { Viewport } from "../../lib/editor/viewport.svelte.ts";
     import { EdgeRouter } from "../../lib/graph/edges.ts";
-    import { graphBounds, NAME_BASELINE, type Point, snapToGrid, stateAt } from "../../lib/graph/geometry.ts";
+    import { EDGE_LABEL_SIZE, graphBounds, NAME_BASELINE, type Point, snapToGrid, stateAt } from "../../lib/graph/geometry.ts";
+    import { measureText } from "../../lib/ui/measure.ts";
     import ArrowMarkers, { ARROW_ACCENT } from "./ArrowMarkers.svelte";
     import CanvasMenu, { MENU_SIZE } from "./CanvasMenu.svelte";
     import GraphEdge from "./GraphEdge.svelte";
@@ -90,7 +91,9 @@
 
     /** Centers and scales the view so that the whole graph is visible. */
     export function fit(): void {
-        view.fit(graphBounds(states, router.loops, FIT_MARGIN), width, height);
+        const font = `${EDGE_LABEL_SIZE}px ${svg ? getComputedStyle(svg).fontFamily : "sans-serif"}`;
+        const labels = router.labels((group) => editor.edgeLabel(group), (text) => measureText(text, font));
+        view.fit(graphBounds(states, router.loops, labels, FIT_MARGIN), width, height);
     }
 
     /** Zooms by a factor (> 1 zooms in) around a canvas point, the center by default. */

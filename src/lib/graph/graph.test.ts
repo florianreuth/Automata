@@ -9,10 +9,11 @@ import { faExamples } from "../automata/fa/examples.ts";
 import { transitionLabel } from "../automata/fa/model.ts";
 import { type StateNode } from "../automata/machine.ts";
 import { edgeKey, EdgeRouter } from "./edges.ts";
-import { snapToGrid, stateAt } from "./geometry.ts";
+import { graphBounds, snapToGrid, stateAt } from "./geometry.ts";
 import { renderMachineSvg } from "./svg.ts";
 
 const state = (id: string, x: number, y: number): StateNode => ({ id, name: id, x, y, initial: false, final: false });
+const measure = (text: string) => text.length * 8;
 
 describe("geometry", () => {
     it("hits the topmost state under the point", () => {
@@ -24,6 +25,18 @@ describe("geometry", () => {
 
     it("snaps to the grid", () => {
         assert.deepEqual(snapToGrid({ x: 14, y: -6 }, 10), { x: 10, y: -10 });
+    });
+
+    it("grows the bounds to fit long edge labels", () => {
+        const states = [state("a", 0, 0), state("b", 0, 200)];
+        const router = new EdgeRouter(states, [{ id: "1", from: "a", to: "b" }]);
+        const label = "hallo, welt, automat, grammatik";
+        const [positioned] = router.labels(() => label, measure);
+        assert.equal(positioned.width, measure(label));
+        const box = graphBounds(states, router.loops, [positioned]);
+        assert.ok(graphBounds(states, router.loops).width < box.width);
+        const reach = positioned.anchor === "end" ? positioned.x - positioned.width : positioned.x + positioned.width;
+        assert.ok(box.x < reach && reach < box.x + box.width, `${reach} outside ${JSON.stringify(box)}`);
     });
 });
 
@@ -58,7 +71,7 @@ describe("renderMachineSvg", () => {
     it("renders every state and escapes text", () => {
         const fa = faExamples[0].create();
         fa.states[0].name = "<q0>";
-        const svg = renderMachineSvg(fa, (group) => transitionLabel(group.transitions));
+        const svg = renderMachineSvg(fa, (group) => transitionLabel(group.transitions), measure);
         const finals = fa.states.filter((s) => s.final).length;
         assert.match(svg, /^<svg xmlns="http:\/\/www\.w3\.org\/2000\/svg"/);
         assert.equal(svg.match(/<circle /g)?.length, fa.states.length + finals);
