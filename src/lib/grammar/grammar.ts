@@ -82,7 +82,6 @@ export function nonterminalsOf(grammar: Grammar): string[] {
     return [...new Set(symbols.filter(isNonterminal))];
 }
 
-/** Terminals, sorted naturally. */
 export function terminalsOf(grammar: Grammar): string[] {
     const symbols = grammar.productions.flatMap((p) => [...p.left, ...p.right]);
     return [...new Set(symbols.filter((symbol) => !isNonterminal(symbol)))].sort(naturalCompare);

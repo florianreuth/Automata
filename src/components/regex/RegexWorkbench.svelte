@@ -41,7 +41,6 @@
     });
     const nfa = $derived("regex" in parsed ? regexToNfa(parsed.regex, `NEA zu ${source.trim() || "ε"}`) : null);
     const svg = $derived(nfa ? renderMachineSvg(nfa, (group) => transitionLabel(group.transitions), measureText) : "");
-    const alphabet = $derived(nfa ? alphabetOf(nfa) : []);
 
     const exampleItems: DropdownItem[] = regexExamples.map((example) => ({
         label: example.title,
@@ -94,7 +93,7 @@
             </header>
             <dl class="facts">
                 <dt>Alphabet Σ</dt>
-                <dd class="mono">{formatSet(alphabet)}</dd>
+                <dd class="mono">{formatSet(alphabetOf(nfa))}</dd>
                 <dt>Zustände</dt>
                 <dd>{nfa.states.length}</dd>
             </dl>

@@ -107,7 +107,6 @@
         fit();
     }
 
-    /** Opens the inline rename field for the selected state. */
     export function renameSelected(): void {
         if (editor.selection?.kind === "state") {
             openRename(editor.selection.id);

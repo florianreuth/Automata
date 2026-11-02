@@ -3,12 +3,11 @@
 //
 // Copyright (c) 2026 Florian Reuth <git@florianreuth.de>
 
-/** A topic area of the application; only modules with an href are shown on the start page. */
 export interface Module {
     id: string;
     title: string;
     description: string;
-    /** Route of the editor without the site base; only set once the module is available. */
+    /** Route of the editor without the site base; modules without one are hidden on the start page. */
     href?: string;
     features: string[];
 }

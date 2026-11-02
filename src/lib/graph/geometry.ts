@@ -44,7 +44,6 @@ export function stateAt(states: readonly StateNode[], point: Point): StateNode |
     return states.findLast((state) => Math.hypot(state.x - point.x, state.y - point.y) <= STATE_RADIUS + HIT_TOLERANCE) ?? null;
 }
 
-/** Rounds a point to the nearest grid intersection. */
 export function snapToGrid(point: Point, grid: number): Point {
     return { x: Math.round(point.x / grid) * grid, y: Math.round(point.y / grid) * grid };
 }

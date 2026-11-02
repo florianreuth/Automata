@@ -14,7 +14,6 @@ export interface SimulationStep {
     states: ReadonlySet<string>;
 }
 
-/** Full run of an automaton on one word. */
 export interface SimulationResult {
     input: string[];
     steps: SimulationStep[];
@@ -50,10 +49,7 @@ export function move(fa: FiniteAutomaton, states: ReadonlySet<string>, symbol: s
     return result;
 }
 
-/**
- * Splits a word into symbols: at whitespace if it contains any, otherwise greedily by the longest alphabet symbol.
- * Characters that start no alphabet symbol become single (unknown) symbols.
- */
+/** Splits a word at whitespace if it has any, otherwise greedily by the longest alphabet symbol; other characters become single symbols. */
 export function tokenizeWord(word: string, alphabet: readonly string[]): string[] {
     if (/\s/.test(word)) {
         return word.split(/\s+/).filter((part) => part.length > 0);
@@ -109,10 +105,7 @@ export function stepTransitions(fa: FiniteAutomaton, result: SimulationResult, s
     );
 }
 
-/**
- * Lists every state/symbol pair on which a run dies, i.e. where an error (trap) state is missing.
- * ε-transitions are taken into account, so a symbol readable after an ε-move is not reported.
- */
+/** State/symbol pairs on which a run dies (a missing trap state); a symbol readable after an ε-move is not reported. */
 export function missingTransitions(fa: FiniteAutomaton): { state: StateNode; symbol: string }[] {
     const alphabet = alphabetOf(fa);
     return [...fa.states]

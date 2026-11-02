@@ -11,10 +11,7 @@ const ROW_SPACING = 140;
 const COMPONENT_SPACING = 100;
 const ORIGIN = 120;
 
-/**
- * Computes a left-to-right layered layout: columns by distance from the initial state, rows ordered to reduce crossings.
- * Disconnected parts are stacked below each other; self-loops are ignored.
- */
+/** Left-to-right layers by distance from the initial state, rows ordered to reduce crossings, disconnected parts stacked. */
 export function layeredLayout(states: readonly StateNode[], edges: readonly Edge[]): Map<string, Point> {
     const neighbors = new Map(states.map((state) => [state.id, new Set<string>()]));
     for (const edge of edges) {

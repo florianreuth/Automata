@@ -4,7 +4,7 @@
 // Copyright (c) 2026 Florian Reuth <git@florianreuth.de>
 
 import { EPSILON, formatSet, naturalCompare } from "../machine.ts";
-import { alphabetOf, type FiniteAutomaton, isDeterministic } from "./model.ts";
+import { alphabetOf, type FiniteAutomaton, initialStateOf, isDeterministic } from "./model.ts";
 
 export interface TransitionRow {
     state: string;
@@ -39,7 +39,7 @@ export function formalDefinition(fa: FiniteAutomaton, name = "A"): FormalDefinit
         title: fa.title,
         states: states.map((state) => state.name),
         alphabet,
-        initial: fa.states.find((state) => state.initial)?.name ?? null,
+        initial: initialStateOf(fa)?.name ?? null,
         finals: states.filter((state) => state.final).map((state) => state.name),
         deterministic: isDeterministic(fa),
         columns,

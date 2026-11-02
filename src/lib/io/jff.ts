@@ -35,10 +35,7 @@ export function faToJff(fa: FiniteAutomaton): string {
     return lines.join("\n");
 }
 
-/**
- * Parses a JFLAP .jff file containing a finite automaton; requires a browser DOMParser.
- * @throws Error with a German message if the file is malformed or not a finite automaton
- */
+/** Requires a browser DOMParser; throws a German Error if the file is malformed or not a finite automaton. */
 export function faFromJff(xml: string, title: string): FiniteAutomaton {
     const document = new DOMParser().parseFromString(xml, "application/xml");
     if (document.querySelector("parsererror")) {

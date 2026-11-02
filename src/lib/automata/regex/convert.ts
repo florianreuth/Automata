@@ -76,8 +76,7 @@ export function regexToNfa(regex: Regex, title: string): FiniteAutomaton {
 }
 
 /**
- * Derives an equivalent regular expression by state elimination, removing the state with the fewest
- * paths through it first to keep the result short.
+ * Derives an equivalent regular expression by state elimination, fewest paths through a state first to keep it short.
  * @throws Error if the automaton has no initial state
  */
 export function faToRegex(fa: FiniteAutomaton): Regex {

@@ -37,7 +37,6 @@ export interface GraphEditor<T extends Edge = Edge> {
     /** Repositions all states with an automatic layout as one undoable step. */
     arrange(): void;
 
-    /** Formats the label of an edge group as shown on the canvas. */
     edgeLabel(group: EdgeGroup<T>): string;
 
     /** Editable text of the edge between two states, empty if there is no edge yet. */
@@ -46,6 +45,6 @@ export interface GraphEditor<T extends Edge = Edge> {
     /** Replaces all transitions between two states by the parsed text; returns a German error message, or null on success. */
     applyEdgeText(from: string, to: string, text: string): string | null;
 
-    /** Placeholder for the inline edge editor, e.g. "0, 1 oder leer für ε". */
+    /** Placeholder for the inline edge editor. */
     readonly edgeHint: string;
 }

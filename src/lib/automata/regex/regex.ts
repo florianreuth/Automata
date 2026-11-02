@@ -19,7 +19,6 @@ export const EMPTY: Regex = { kind: "empty" };
 export const EPSILON_REGEX: Regex = { kind: "epsilon" };
 
 export const EMPTY_SET = "∅";
-/** Postfix operators and the node kind each one creates. */
 export const POSTFIX_OPERATORS = new Map<string, "star" | "plus" | "optional">([
     ["*", "star"],
     ["+", "plus"],

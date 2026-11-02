@@ -117,10 +117,7 @@ function firstOfSequence(
     return { first: result, nullable: true };
 }
 
-/**
- * Runs the table-driven LL(1) parser and records every step; conflicting cells use their first production.
- * @param word input symbols, one terminal each
- */
+/** Runs the table-driven LL(1) parser on terminals and records every step; conflicting cells use their first production. */
 export function parseLl1(grammar: Grammar, analysis: Ll1Analysis, word: readonly string[]): Ll1Run {
     const tree: ParseTree = { symbol: grammar.start, children: [] };
     const stack: (ParseTree | null)[] = [null, tree];
