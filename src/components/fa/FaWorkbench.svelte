@@ -7,7 +7,7 @@
 
 <script lang="ts">
     import { onMount, tick } from "svelte";
-    import { minimizeDfa, toDfa } from "../../lib/automata/fa/convert.ts";
+    import { addTrapState, minimizeDfa, toDfa } from "../../lib/automata/fa/convert.ts";
     import { faExamples } from "../../lib/automata/fa/examples.ts";
     import { createFiniteAutomaton, type FaTransition, type FiniteAutomaton } from "../../lib/automata/fa/model.ts";
     import { FaEditor } from "../../lib/editor/fa-editor.svelte.ts";
@@ -146,6 +146,7 @@
 
     const convertToDfa = () => replaceWith(toDfa, (_, after) => `In einen DEA mit ${after} Zuständen umgewandelt.`);
     const minimize = () => replaceWith(minimizeDfa, (before, after) => `Minimal-DEA mit ${after} Zuständen erzeugt (vorher ${before}).`);
+    const addTrap = () => replaceWith(addTrapState, () => "Fehlerzustand ergänzt.");
 
     function onKeyDown(event: KeyboardEvent) {
         // Typing in fields and dialogs must not trigger editor shortcuts.
@@ -216,11 +217,11 @@
             />
             <div class="tab-body" role="tabpanel">
                 {#if tab === "simulation"}
-                    <SimulationPanel fa={editor.machine} onhighlight={(value) => (highlight = value)}/>
+                    <SimulationPanel fa={editor.machine} onhighlight={(value) => (highlight = value)} onaddtrap={addTrap}/>
                 {:else if tab === "batch"}
                     <BatchPanel fa={editor.machine}/>
                 {:else}
-                    <PropertiesPanel fa={editor.machine} onconvert={convertToDfa} onminimize={minimize}/>
+                    <PropertiesPanel fa={editor.machine} onconvert={convertToDfa} onminimize={minimize} onaddtrap={addTrap}/>
                 {/if}
             </div>
         </aside>

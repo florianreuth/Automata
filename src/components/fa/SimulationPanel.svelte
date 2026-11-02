@@ -16,9 +16,10 @@
         fa: FiniteAutomaton;
         /** Receives the states and edge keys to highlight, or null when no simulation is running. */
         onhighlight: (highlight: { states: ReadonlySet<string>; edges: ReadonlySet<string> } | null) => void;
+        onaddtrap: () => void;
     }
 
-    let { fa, onhighlight }: Props = $props();
+    let { fa, onhighlight, onaddtrap }: Props = $props();
 
     let input = $state("");
     let step = $state(0);
@@ -82,11 +83,14 @@
         <p class="note warn">Nicht im Alphabet: {result.unknownSymbols.join(", ")}</p>
     {/if}
     {#if missing.length > 0}
-        <p class="note warn">
-            <strong>Fehlerzustand fehlt:</strong> Für {missing.length === 1 ? "einen Übergang" : `${missing.length} Übergänge`} gibt es kein Ziel –
-            <span class="mono">{missing.slice(0, 6).map((m) => `δ(${m.state.name}, ${displaySymbol(m.symbol)})`).join(", ")}{missing.length > 6 ? ` und ${missing.length - 6} weitere` : ""}</span>.
-            Wörter, die einen davon benötigen, werden verworfen.
-        </p>
+        <div class="note warn trap">
+            <p>
+                <strong>Fehlerzustand fehlt:</strong> Für {missing.length === 1 ? "einen Übergang" : `${missing.length} Übergänge`} gibt es kein Ziel –
+                <span class="mono">{missing.slice(0, 6).map((m) => `δ(${m.state.name}, ${displaySymbol(m.symbol)})`).join(", ")}{missing.length > 6 ? ` und ${missing.length - 6} weitere` : ""}</span>.
+                Wörter, die einen davon benötigen, werden verworfen.
+            </p>
+            <button class="button" onclick={onaddtrap}>Fehlerzustand ergänzen</button>
+        </div>
     {/if}
 
     <div class="controls">
@@ -147,6 +151,12 @@
 </section>
 
 <style>
+    .trap {
+        display: grid;
+        gap: 8px;
+        justify-items: start;
+    }
+
     .controls {
         display: flex;
         gap: 6px;

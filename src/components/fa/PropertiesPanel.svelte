@@ -8,6 +8,7 @@
 <script lang="ts">
     import { formatSet, naturalCompare } from "../../lib/automata/machine.ts";
     import { alphabetOf, type FiniteAutomaton, isComplete, isDeterministic, unreachableStates } from "../../lib/automata/fa/model.ts";
+    import { missingTransitions } from "../../lib/automata/fa/simulate.ts";
     import { faToRegex } from "../../lib/automata/regex/convert.ts";
     import { formatRegex } from "../../lib/automata/regex/regex.ts";
     import { formatGrammar } from "../../lib/grammar/grammar.ts";
@@ -18,9 +19,10 @@
         fa: FiniteAutomaton;
         onconvert: () => void;
         onminimize: () => void;
+        onaddtrap: () => void;
     }
 
-    let { fa, onconvert, onminimize }: Props = $props();
+    let { fa, onconvert, onminimize, onaddtrap }: Props = $props();
 
     const deterministic = $derived(isDeterministic(fa));
     const complete = $derived(isComplete(fa));
@@ -87,7 +89,8 @@
     <h3>Umwandlungen</h3>
     <button class="button primary wide" onclick={onconvert} disabled={!initial}>NEA → DEA (Potenzmengenkonstruktion)</button>
     <button class="button wide" onclick={onminimize} disabled={!initial}>EA → Minimal-DEA (Zustandsminimierung)</button>
-    <p class="hint">Beide Umwandlungen ersetzen den aktuellen Automaten und lassen sich mit Strg+Z rückgängig machen.</p>
+    <button class="button wide" onclick={onaddtrap} disabled={missingTransitions(fa).length === 0}>Fehlerzustand ergänzen</button>
+    <p class="hint">Diese Umwandlungen ändern den aktuellen Automaten und lassen sich mit Strg+Z rückgängig machen.</p>
     <button class="button wide" onclick={() => (showRegex = !showRegex)} disabled={!initial} aria-expanded={showRegex}>EA → RA (Zustandselimination)</button>
     {#if regex !== null}
         <p class="mono regex">{regex}</p>

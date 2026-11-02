@@ -5,7 +5,7 @@
 
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { minimizeDfa, toDfa } from "./convert.ts";
+import { addTrapState, minimizeDfa, toDfa } from "./convert.ts";
 import { definitionToLatex, definitionToText } from "./definition-export.ts";
 import { formalDefinition, transitionSignature } from "./definition.ts";
 import { faExamples } from "./examples.ts";
@@ -181,6 +181,32 @@ describe("missingTransitions", () => {
         const missing = missingTransitions(example("ends-with-01")).map((m) => `${m.state.name}:${m.symbol}`);
         assert.deepEqual(missing, ["q1:0", "q2:0", "q2:1"]);
         assert.deepEqual(missingTransitions(example("epsilon-ab")).map((m) => `${m.state.name}:${m.symbol}`), ["q1:a"]);
+    });
+});
+
+describe("addTrapState", () => {
+    it("routes every missing transition into a looping trap state without changing the language", () => {
+        const fa = example("ends-with-01");
+        const completed = addTrapState(fa);
+        const trap = completed.states.at(-1)!;
+        assert.equal(completed.states.length, fa.states.length + 1);
+        assert.equal(trap.final, false);
+        assert.ok(trap.x > Math.max(...fa.states.map((state) => state.x)));
+        assert.deepEqual(completed.states.slice(0, -1), fa.states);
+        assert.deepEqual(missingTransitions(completed), []);
+        assert.equal(isComplete(completed), false, "still nondeterministic");
+        for (const word of ["", "0", "01", "101", "0110", "11", "1001"]) {
+            assert.equal(simulate(completed, word).accepted, simulate(fa, word).accepted, word);
+        }
+    });
+
+    it("makes a partial DFA complete and leaves complete automata alone", () => {
+        const partial = example("signed-binary");
+        partial.transitions = partial.transitions.filter((t) => t.to !== partial.states[4].id);
+        partial.states = partial.states.slice(0, 4);
+        assert.equal(isComplete(addTrapState(partial)), true);
+        const complete = example("signed-binary");
+        assert.equal(addTrapState(complete), complete);
     });
 });
 

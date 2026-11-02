@@ -4,9 +4,11 @@
 // Copyright (c) 2026 Florian Reuth <git@florianreuth.de>
 
 import { applyLayout } from "../../graph/layout.ts";
-import { createId, formatSet, naturalCompare, type StateNode } from "../machine.ts";
+import { createId, formatSet, naturalCompare, nextStateName, type StateNode } from "../machine.ts";
 import { alphabetOf, type FaTransition, type FiniteAutomaton, initialStateOf, isDeterministic } from "./model.ts";
-import { epsilonClosure, move } from "./simulate.ts";
+import { epsilonClosure, missingTransitions, move } from "./simulate.ts";
+
+const TRAP_DISTANCE = 200;
 
 /**
  * Converts an NFA into an equivalent complete DFA using the powerset construction.
@@ -63,6 +65,31 @@ export function toDfa(fa: FiniteAutomaton): FiniteAutomaton {
     }));
     applyLayout(states, transitions);
     return { kind: "fa", title: `${fa.title} (DEA)`, states, transitions };
+}
+
+/**
+ * Adds a non-final trap state that receives every missing transition and loops on every symbol, so the language stays the same.
+ * Existing states keep their positions, the trap state goes right of them; returns the automaton unchanged if nothing is missing.
+ */
+export function addTrapState(fa: FiniteAutomaton): FiniteAutomaton {
+    const missing = missingTransitions(fa);
+    if (missing.length === 0) {
+        return fa;
+    }
+    const trap: StateNode = {
+        id: createId(),
+        name: nextStateName(fa.states),
+        label: "Fehlerzustand",
+        x: Math.max(...fa.states.map((state) => state.x)) + TRAP_DISTANCE,
+        y: fa.states.reduce((sum, state) => sum + state.y, 0) / fa.states.length,
+        initial: false,
+        final: false,
+    };
+    const added: FaTransition[] = [
+        ...missing.map(({ state, symbol }) => ({ id: createId(), from: state.id, to: trap.id, symbol })),
+        ...alphabetOf(fa).map((symbol) => ({ id: createId(), from: trap.id, to: trap.id, symbol })),
+    ];
+    return { ...fa, states: [...fa.states, trap], transitions: [...fa.transitions, ...added] };
 }
 
 /**
