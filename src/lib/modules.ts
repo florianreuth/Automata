@@ -31,7 +31,7 @@ export const modules: Module[] = [
     {
         id: "grammar",
         title: "Grammatiken & Parsing",
-        description: "Den Chomsky-Typ bestimmen, in Chomsky-Normalform bringen und Wörter mit CYK oder LL(1) ableiten.",
+        description: "Den Chomsky-Typ bestimmen, in Chomsky-Normalform bringen, Wörter mit CYK oder LL(1) ableiten und reguläre Grammatiken in NEA umwandeln.",
         href: "/grammatik",
     },
     {

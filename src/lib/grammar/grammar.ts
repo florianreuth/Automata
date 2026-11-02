@@ -94,20 +94,26 @@ export function isContextFree(grammar: Grammar): boolean {
 /** Most specific Chomsky type; regular means uniformly right-linear or left-linear. */
 export function classify(grammar: Grammar): ChomskyType {
     if (isContextFree(grammar)) {
-        const linear = (right: string[], nonterminalAt: "start" | "end") => {
-            const nonterminals = right.map((symbol, i) => (isNonterminal(symbol) ? i : -1)).filter((i) => i >= 0);
-            return nonterminals.length === 0 || (nonterminals.length === 1 && nonterminals[0] === (nonterminalAt === "end" ? right.length - 1 : 0));
-        };
-        if (grammar.productions.every((p) => linear(p.right, "end")) || grammar.productions.every((p) => linear(p.right, "start"))) {
-            return { type: 3, label: "Typ 3 (regulär)" };
-        }
-        return { type: 2, label: "Typ 2 (kontextfrei)" };
+        return linearity(grammar) ? { type: 3, label: "Typ 3 (regulär)" } : { type: 2, label: "Typ 2 (kontextfrei)" };
     }
     const startOnRight = grammar.productions.some((p) => p.right.includes(grammar.start));
     const monotone = grammar.productions.every(
         (p) => p.left.length <= p.right.length || (p.right.length === 0 && !startOnRight && p.left.length === 1 && p.left[0] === grammar.start),
     );
     return monotone ? { type: 1, label: "Typ 1 (kontextsensitiv)" } : { type: 0, label: "Typ 0 (unbeschränkt)" };
+}
+
+/** Side of the at most one nonterminal in every right side; "right" wins if both hold, null if the grammar is not regular. */
+export function linearity(grammar: Grammar): "right" | "left" | null {
+    if (!isContextFree(grammar)) {
+        return null;
+    }
+    const linear = (side: "right" | "left") =>
+        grammar.productions.every(({ right }) => {
+            const positions = right.flatMap((symbol, i) => (isNonterminal(symbol) ? [i] : []));
+            return positions.length === 0 || (positions.length === 1 && positions[0] === (side === "right" ? right.length - 1 : 0));
+        });
+    return linear("right") ? "right" : linear("left") ? "left" : null;
 }
 
 /** Joins symbols without spaces unless a multi-character nonterminal would make that ambiguous; ε if empty. */

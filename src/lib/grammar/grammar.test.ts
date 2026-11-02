@@ -12,7 +12,7 @@ import { cyk } from "./cyk.ts";
 import { grammarExamples } from "./examples.ts";
 import { classify, formatGrammar, type Grammar, parseGrammar, tokenize } from "./grammar.ts";
 import { analyzeLl1, parseLl1 } from "./ll1.ts";
-import { faToGrammar } from "./regular.ts";
+import { faToGrammar, grammarToFa } from "./regular.ts";
 import { layoutTree, type ParseTree } from "./tree.ts";
 
 const grammarOf = (source: string): Grammar => {
@@ -142,5 +142,34 @@ describe("faToGrammar", () => {
         fa.states.forEach((state) => (state.initial = false));
         assert.throws(() => faToGrammar(fa), /keinen Startzustand/);
         assert.throws(() => faToGrammar({ ...faExample("ends-with-01"), transitions: [] }), /kein Wort/);
+    });
+});
+
+describe("grammarToFa", () => {
+    const accepts = (source: string, words: Record<string, boolean>) => {
+        const fa = grammarToFa(grammarOf(source), "Test");
+        for (const [word, expected] of Object.entries(words)) {
+            assert.equal(simulate(fa, word).accepted, expected, `${source}: „${word}“`);
+        }
+    };
+
+    it("accepts the same words as the automaton a grammar was derived from", () => {
+        const original = faExamples.find((e) => e.id === "signed-binary")!.create();
+        const fa = grammarToFa(faToGrammar(original), "Test");
+        for (const word of ["", "0", "1", "101", "-1", "-110", "-", "-0", "01", "1-0", "--1"]) {
+            assert.equal(simulate(fa, word).accepted, simulate(original, word).accepted, word);
+        }
+    });
+
+    it("splits multi-terminal right sides into paths", () => {
+        accepts("S → abS | c | A\nA → ε", { "": true, c: true, abc: true, ababc: true, ab: true, a: false, ac: false, cc: false });
+    });
+
+    it("handles left-linear grammars", () => {
+        accepts("S → Sa | Bb\nB → Bb | ε", { b: true, bbb: true, ba: true, bbaa: true, "": false, a: false, ab: false, bab: false });
+    });
+
+    it("rejects grammars that are not regular", () => {
+        assert.throws(() => grammarToFa(example("anbn"), "Test"), /Nur reguläre Grammatiken/);
     });
 });

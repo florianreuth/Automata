@@ -9,7 +9,10 @@
     import { grammarExamples } from "../../lib/grammar/examples.ts";
     import { formatSet } from "../../lib/automata/machine.ts";
     import { classify, isContextFree, nonterminalsOf, parseGrammar, terminalsOf, tokenize } from "../../lib/grammar/grammar.ts";
+    import { grammarToFa } from "../../lib/grammar/regular.ts";
     import { loadAutosave, storeAutosave } from "../../lib/io/autosave.ts";
+    import { handOffAutomaton } from "../../lib/io/handoff.ts";
+    import { withBase } from "../../lib/paths.ts";
     import { autoReplace } from "../../lib/ui/text-input.ts";
     import Dropdown, { type DropdownItem } from "../ui/Dropdown.svelte";
     import SymbolBar from "../ui/SymbolBar.svelte";
@@ -33,6 +36,8 @@
     const parsed = $derived(parseGrammar(source));
     const grammar = $derived("grammar" in parsed ? parsed.grammar : null);
     const symbols = $derived(tokenize(word));
+    const chomsky = $derived(grammar ? classify(grammar) : null);
+    let handOffFailed = $state(false);
 
     const exampleItems: DropdownItem[] = grammarExamples.map((example) => ({
         label: example.title,
@@ -44,6 +49,13 @@
     }));
 
     $effect(() => storeAutosave(AUTOSAVE_KEY, JSON.stringify({ source, word })));
+
+    function openAsAutomaton() {
+        handOffFailed = !(grammar && handOffAutomaton(grammarToFa(grammar, "NEA zur Grammatik")));
+        if (!handOffFailed) {
+            window.location.href = withBase("/endlicher-automat");
+        }
+    }
 
     function parseSaved(json: string): { source: string; word: string } | null {
         const data = JSON.parse(json);
@@ -123,7 +135,7 @@
             {:else if grammar}
                 <dl class="facts">
                     <dt>Typ</dt>
-                    <dd>{classify(grammar).label}</dd>
+                    <dd>{chomsky?.label}</dd>
                     <dt>Startsymbol</dt>
                     <dd class="mono">{grammar.start}</dd>
                     <dt>Nichtterminale</dt>
@@ -133,6 +145,12 @@
                     <dt>Produktionen</dt>
                     <dd>{grammar.productions.length}</dd>
                 </dl>
+                {#if chomsky?.type === 3}
+                    <button class="button wide" onclick={openAsAutomaton}>Reguläre Grammatik → NEA</button>
+                    {#if handOffFailed}
+                        <p class="note warn">Der Automat konnte nicht übergeben werden. Ist der Speicher des Browsers gesperrt?</p>
+                    {/if}
+                {/if}
             {/if}
         </section>
     {/snippet}

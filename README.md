@@ -25,12 +25,11 @@ Built with [Astro](https://astro.build), [Svelte](https://svelte.dev) and TypeSc
 ![Regular expressions](.github/images/regular-expression.png)
 
 **Grammars**: Chomsky classification, Chomsky normal form, CYK, FIRST/FOLLOW sets and LL(1) parsing with derivation
-tree. Type `->` for `→`; an empty alternative means ε.
+tree, and regular (right- or left-linear) grammar → NFA. Type `->` for `→`; an empty alternative means ε.
 
 ![Grammars and parsing](.github/images/grammar.png)
 
-Planned: regular grammar → FA, SLR(1) and brute-force parsing, pushdown automata, Turing machines and
-L-systems.
+Planned: SLR(1) and brute-force parsing, pushdown automata, Turing machines and L-systems.
 
 ### Keyboard shortcuts (automaton editor)
 
