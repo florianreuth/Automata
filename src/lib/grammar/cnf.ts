@@ -137,16 +137,17 @@ function removeUnitRules(rules: Rule[]): Rule[] {
 
 function removeUselessRules(rules: Rule[], start: string): Rule[] {
     const productive = new Set<string>();
+    const isProductive = (symbol: string) => !isNonterminal(symbol) || productive.has(symbol);
     for (let changed = true; changed; ) {
         changed = false;
         for (const [left, right] of rules) {
-            if (!productive.has(left) && right.every((symbol) => !isNonterminal(symbol) || productive.has(symbol))) {
+            if (!productive.has(left) && right.every(isProductive)) {
                 productive.add(left);
                 changed = true;
             }
         }
     }
-    const productiveRules = rules.filter(([left, right]) => productive.has(left) && right.every((symbol) => !isNonterminal(symbol) || productive.has(symbol)));
+    const productiveRules = rules.filter(([left, right]) => productive.has(left) && right.every(isProductive));
     const reachable = new Set([start]);
     for (let changed = true; changed; ) {
         changed = false;
