@@ -9,47 +9,40 @@ export interface Module {
     description: string;
     /** Route of the editor without the site base; modules without one are hidden on the start page. */
     href?: string;
-    features: string[];
 }
 
 export const modules: Module[] = [
     {
         id: "fa",
         title: "Endliche Automaten",
-        description: "Nichtdeterministische und deterministische endliche Automaten zeichnen, simulieren und formal beschreiben.",
+        description: "NEA und DEA zeichnen, Wörter Schritt für Schritt simulieren und in DEA, Minimal-DEA, regulären Ausdruck oder Grammatik umwandeln.",
         href: "/endlicher-automat",
-        features: ["NEA mit ε-Übergängen", "Schrittweise Simulation", "Mehrfachtest", "NEA → DEA", "EA → Grammatik", "Formale Definition", "JFLAP-Import"],
     },
     {
         id: "pda",
         title: "Kellerautomaten",
         description: "Nichtdeterministische Kellerautomaten mit Akzeptanz über Endzustand oder leeren Keller.",
-        features: ["NKA", "Konfigurationsbaum"],
     },
     {
         id: "tm",
         title: "Turingmaschinen",
         description: "Ein- und Mehrband-Turingmaschinen mit Bausteinen.",
-        features: ["Mehrband", "Bausteine"],
     },
     {
         id: "grammar",
         title: "Grammatiken & Parsing",
-        description: "Grammatiken klassifizieren, kontextfreie in Chomsky-Normalform bringen und mit CYK- und LL(1)-Parser ableiten.",
+        description: "Den Chomsky-Typ bestimmen, in Chomsky-Normalform bringen und Wörter mit CYK oder LL(1) ableiten.",
         href: "/grammatik",
-        features: ["Chomsky-Hierarchie", "Chomsky-Normalform", "CYK", "LL(1)", "Ableitungsbaum"],
     },
     {
         id: "regex",
         title: "Reguläre Ausdrücke",
-        description: "Reguläre Ausdrücke testen, in NEA umwandeln und aus endlichen Automaten zurückgewinnen.",
+        description: "Ausdrücke an vielen Wörtern testen und mit der Thompson-Konstruktion in einen NEA umwandeln.",
         href: "/regulaerer-ausdruck",
-        features: ["RA → NEA (Thompson)", "EA → RA", "Mehrfachtest"],
     },
     {
         id: "lsystem",
         title: "L-Systeme",
         description: "Lindenmayer-Systeme ableiten und als Turtle-Grafik darstellen.",
-        features: ["Turtle-Grafik"],
     },
 ];
