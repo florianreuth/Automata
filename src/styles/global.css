@@ -74,7 +74,9 @@ body {
     outline-offset: 2px;
 }
 
-.mono {
+/* .field .mono outranks the font reset of .field inputs below. */
+.mono,
+.field .mono {
     font-family: var(--mono);
 }
 
