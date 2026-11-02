@@ -25,8 +25,6 @@
     --accent: #a3307f;
     --on-accent: #ffffff;
     --active: #f6e3f0;
-    --neon: #2a8fd6;
-    --amber: #e8743b;
     --success: #1f8a4c;
     --danger: #c43d3d;
     --warn-bg: #fdf1e7;
@@ -49,8 +47,6 @@
         --accent: #e77fc8;
         --on-accent: #10111c;
         --active: #3a1f33;
-        --neon: #4cc3f0;
-        --amber: #f29256;
         --success: #5fd08f;
         --danger: #f07575;
         --warn-bg: #2e2117;
@@ -108,10 +104,6 @@ body {
 .button.ghost {
     border-color: transparent;
     background: none;
-}
-
-.button.ghost:hover {
-    background: var(--hover);
 }
 
 .button.primary {
