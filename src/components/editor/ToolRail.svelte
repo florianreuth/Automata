@@ -5,15 +5,12 @@
   Copyright (c) 2026 Florian Reuth <git@florianreuth.de>
 -->
 
-<script lang="ts" module>
-    /** Zoom factor of one click on the zoom buttons. */
-    export const ZOOM_STEP = 1.2;
-</script>
-
 <script lang="ts">
     import type { Tool } from "../../lib/editor/graph-editor.ts";
     import { TOOLS } from "../../lib/editor/tools.ts";
     import { tooltip } from "../../lib/ui/tooltip.ts";
+
+    const ZOOM_STEP = 1.2;
 
     interface Props {
         tool: Tool;
