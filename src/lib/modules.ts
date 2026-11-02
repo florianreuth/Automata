@@ -19,7 +19,7 @@ export const modules: Module[] = [
         title: "Endliche Automaten",
         description: "Nichtdeterministische und deterministische endliche Automaten zeichnen, simulieren und formal beschreiben.",
         href: "/endlicher-automat",
-        features: ["NEA mit ε-Übergängen", "Schrittweise Simulation", "Mehrfachtest", "NEA → DEA", "Formale Definition", "JFLAP-Import"],
+        features: ["NEA mit ε-Übergängen", "Schrittweise Simulation", "Mehrfachtest", "NEA → DEA", "EA → Grammatik", "Formale Definition", "JFLAP-Import"],
     },
     {
         id: "pda",

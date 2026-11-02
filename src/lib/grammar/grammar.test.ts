@@ -5,11 +5,14 @@
 
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
+import { faExamples } from "../automata/fa/examples.ts";
+import { simulate } from "../automata/fa/simulate.ts";
 import { isCnf, toCnf } from "./cnf.ts";
 import { cyk } from "./cyk.ts";
 import { grammarExamples } from "./examples.ts";
 import { classify, formatGrammar, type Grammar, parseGrammar, tokenize } from "./grammar.ts";
 import { analyzeLl1, parseLl1 } from "./ll1.ts";
+import { faToGrammar } from "./regular.ts";
 import { layoutTree, type ParseTree } from "./tree.ts";
 
 const grammarOf = (source: string): Grammar => {
@@ -111,5 +114,33 @@ describe("layoutTree", () => {
         assert.equal(root.x, (a.x + epsilon.x) / 2);
         assert.equal(epsilon.label, "ε");
         assert.ok(root.y < a.y);
+    });
+});
+
+describe("faToGrammar", () => {
+    const faExample = (id: string) => faExamples.find((e) => e.id === id)!.create();
+
+    it("writes transitions, ε-moves and final states as right-linear productions", () => {
+        assert.equal(formatGrammar(faToGrammar(faExample("ends-with-01"))), "S → 0S | 0A | 1S\nA → 1B\nB → ε");
+        assert.equal(formatGrammar(faToGrammar(faExample("epsilon-ab"))), "S → aS | A | ε\nA → bA | ε");
+    });
+
+    it("produces a regular grammar for the same language", () => {
+        const fa = faExample("signed-binary");
+        const grammar = grammarOf(formatGrammar(faToGrammar(fa)));
+        assert.equal(classify(grammar).type, 3);
+        const cnf = toCnf(grammar);
+        for (const word of ["", "0", "1", "101", "-1", "-110", "-", "-0", "01", "1-0", "--1"]) {
+            assert.equal(cyk(cnf, tokenize(word)).accepted, simulate(fa, word).accepted, word);
+        }
+    });
+
+    it("rejects automata it cannot express", () => {
+        const fa = faExample("ends-with-01");
+        fa.transitions[0].symbol = "X";
+        assert.throws(() => faToGrammar(fa), /„X“/);
+        fa.states.forEach((state) => (state.initial = false));
+        assert.throws(() => faToGrammar(fa), /keinen Startzustand/);
+        assert.throws(() => faToGrammar({ ...faExample("ends-with-01"), transitions: [] }), /kein Wort/);
     });
 });

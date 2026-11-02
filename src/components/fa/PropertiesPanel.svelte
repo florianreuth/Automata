@@ -10,6 +10,8 @@
     import { alphabetOf, type FiniteAutomaton, isComplete, isDeterministic, unreachableStates } from "../../lib/automata/fa/model.ts";
     import { faToRegex } from "../../lib/automata/regex/convert.ts";
     import { formatRegex } from "../../lib/automata/regex/regex.ts";
+    import { formatGrammar } from "../../lib/grammar/grammar.ts";
+    import { faToGrammar } from "../../lib/grammar/regular.ts";
     import { withBase } from "../../lib/paths.ts";
 
     interface Props {
@@ -32,6 +34,18 @@
     // Elimination can grow exponentially, so it only runs (and then follows edits) once requested.
     let showRegex = $state(false);
     const regex = $derived(showRegex && initial ? formatRegex(faToRegex(fa)) : null);
+
+    let showGrammar = $state(false);
+    const grammar = $derived.by((): { source: string } | { error: string } | null => {
+        if (!showGrammar) {
+            return null;
+        }
+        try {
+            return { source: formatGrammar(faToGrammar(fa)) };
+        } catch (error) {
+            return { error: error instanceof Error ? error.message : "Die Umwandlung ist fehlgeschlagen." };
+        }
+    });
 
     const typeLabel = $derived(
         deterministic
@@ -79,6 +93,13 @@
         <p class="mono regex">{regex}</p>
         <a class="button wide" href={withBase(`/regulaerer-ausdruck?ra=${encodeURIComponent(regex)}`)}>Im Modul „Reguläre Ausdrücke“ öffnen</a>
     {/if}
+    <button class="button wide" onclick={() => (showGrammar = !showGrammar)} disabled={!initial} aria-expanded={showGrammar}>EA → Grammatik (rechtslinear)</button>
+    {#if grammar && "error" in grammar}
+        <p class="note warn">{grammar.error}</p>
+    {:else if grammar}
+        <pre class="mono grammar">{grammar.source}</pre>
+        <a class="button wide" href={withBase(`/grammatik?g=${encodeURIComponent(grammar.source)}`)}>Im Modul „Grammatiken & Parsing“ öffnen</a>
+    {/if}
 </section>
 
 <style>
@@ -86,10 +107,15 @@
         margin-top: 8px;
     }
 
-    .regex {
+    .regex,
+    .grammar {
         padding: 8px 12px;
         border-radius: 8px;
         background: var(--hover);
         overflow-wrap: anywhere;
+    }
+
+    .grammar {
+        white-space: pre-wrap;
     }
 </style>

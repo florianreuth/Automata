@@ -21,9 +21,12 @@
 
     const AUTOSAVE_KEY = "automata:grammar:autosave";
 
+    // The finite automaton module links here with ?g=… after converting an automaton.
+    const linked = new URL(window.location.href).searchParams.get("g");
+
     const saved = loadAutosave(AUTOSAVE_KEY, parseSaved);
-    let source = $state(saved?.source ?? grammarExamples[0].source);
-    let word = $state(saved?.word ?? grammarExamples[0].word);
+    let source = $state(linked ?? saved?.source ?? grammarExamples[0].source);
+    let word = $state(linked === null ? (saved?.word ?? grammarExamples[0].word) : "");
     let tab = $state<"ll1" | "cyk" | "cnf">("ll1");
     let editor: HTMLTextAreaElement | undefined = $state();
 
