@@ -36,7 +36,7 @@
 
 <section class="panel">
     <label class="field">
-        <span>Ein Wort pro Zeile, ε für das leere Wort</span>
+        <span>Ein Wort pro Zeile, λ für das leere Wort</span>
         <textarea bind:value={words} rows="7" spellcheck="false"></textarea>
     </label>
 

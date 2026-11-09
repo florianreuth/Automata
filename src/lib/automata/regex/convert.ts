@@ -11,7 +11,7 @@ import { concat, EMPTY, EPSILON_REGEX, type Regex, star, symbol, union } from ".
 const SOURCE = "#source";
 const SINK = "#sink";
 
-/** Builds an ε-NFA with the Thompson construction; the initial state is q0 and the only final state is the last one. */
+/** Builds an λ-NFA with the Thompson construction; the initial state is q0 and the only final state is the last one. */
 export function regexToNfa(regex: Regex, title: string): FiniteAutomaton {
     const states: StateNode[] = [];
     const transitions: FaTransition[] = [];

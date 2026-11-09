@@ -29,7 +29,7 @@ describe("JSON documents", () => {
 });
 
 describe("faToJff", () => {
-    it("writes ε as an empty read and escapes names", () => {
+    it("writes λ as an empty read and escapes names", () => {
         const fa = example("epsilon-ab");
         fa.states[0].name = "<q0>";
         const jff = faToJff(fa);

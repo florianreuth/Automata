@@ -97,7 +97,7 @@ export function analyzeLl1(grammar: Grammar): Ll1Analysis {
     return { nonterminals, columns, nullable, first, follow, table, conflicts };
 }
 
-/** FIRST set of a symbol sequence and whether the whole sequence can derive ε. */
+/** FIRST set of a symbol sequence and whether the whole sequence can derive λ. */
 function firstOfSequence(
     symbols: readonly string[],
     first: ReadonlyMap<string, ReadonlySet<string>>,

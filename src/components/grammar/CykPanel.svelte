@@ -31,7 +31,7 @@
     </p>
 
     {#if word.length === 0}
-        <p class="note">Für das leere Wort entscheidet allein, ob die Chomsky-Normalform die Regel {cnf.start} → ε enthält.</p>
+        <p class="note">Für das leere Wort entscheidet allein, ob die Chomsky-Normalform die Regel {cnf.start} → λ enthält.</p>
     {:else}
         <div class="scroll">
             <table class="data-table mono cyk">

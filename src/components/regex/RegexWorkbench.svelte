@@ -26,7 +26,7 @@
 
     let input: HTMLInputElement | undefined = $state();
     let source = $state(linked ?? regexExamples[0].source);
-    let words = $state(linked === null ? regexExamples[0].words : "ε\na\nb\nab\nba");
+    let words = $state(linked === null ? regexExamples[0].words : "λ\na\nb\nab\nba");
     let handOffFailed = $state(false);
 
     const parsed = $derived.by((): { regex: Regex } | { error: RegexSyntaxError } => {
@@ -39,7 +39,7 @@
             throw error;
         }
     });
-    const nfa = $derived("regex" in parsed ? regexToNfa(parsed.regex, `NEA zu ${source.trim() || "ε"}`) : null);
+    const nfa = $derived("regex" in parsed ? regexToNfa(parsed.regex, `NEA zu ${source.trim() || "λ"}`) : null);
     const svg = $derived(nfa ? renderMachineSvg(nfa, (group) => transitionLabel(group.transitions), measureText) : "");
 
     const exampleItems: DropdownItem[] = regexExamples.map((example) => ({
@@ -72,7 +72,7 @@
         <SymbolBar
             target={input}
             symbols={[
-                { text: "ε", hint: "Leeres Wort (oder einfach eine leere Alternative wie a|)" },
+                { text: "λ", hint: "Leeres Wort (oder einfach eine leere Alternative wie a|)" },
                 { text: "∅", hint: "Leere Sprache" },
             ]}
         />

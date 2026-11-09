@@ -24,7 +24,7 @@ export const POSTFIX_OPERATORS = new Map<string, "star" | "plus" | "optional">([
     ["+", "plus"],
     ["?", "optional"],
 ]);
-const RESERVED = new Set(["|", "(", ")", "\\", EPSILON, "λ", EMPTY_SET, ...POSTFIX_OPERATORS.keys()]);
+const RESERVED = new Set(["|", "(", ")", "\\", EPSILON, "ε", EMPTY_SET, ...POSTFIX_OPERATORS.keys()]);
 
 /** Formats a regular expression with as few parentheses as possible. */
 export function formatRegex(regex: Regex): string {
@@ -47,7 +47,7 @@ export function union(a: Regex, b: Regex): Regex {
     for (const item of [...itemsOf(a, "union"), ...itemsOf(b, "union")]) {
         items.set(formatRegex(item), item);
     }
-    // ε is redundant next to a starred alternative, which already matches the empty word.
+    // λ is redundant next to a starred alternative, which already matches the empty word.
     if ([...items.values()].some((item) => item.kind === "star")) {
         items.delete(EPSILON);
     }
@@ -55,7 +55,7 @@ export function union(a: Regex, b: Regex): Regex {
     return unique.length === 1 ? unique[0] : { kind: "union", items: unique };
 }
 
-/** Concatenation that absorbs ε, collapses with ∅ and flattens nested concatenations. */
+/** Concatenation that absorbs λ, collapses with ∅ and flattens nested concatenations. */
 export function concat(a: Regex, b: Regex): Regex {
     if (a.kind === "empty" || b.kind === "empty") {
         return EMPTY;
@@ -69,7 +69,7 @@ export function concat(a: Regex, b: Regex): Regex {
     return { kind: "concat", items: [...itemsOf(a, "concat"), ...itemsOf(b, "concat")] };
 }
 
-/** Kleene star that simplifies ∅*, ε*, r**, (r+)* and (r?)*. */
+/** Kleene star that simplifies ∅*, λ*, r**, (r+)* and (r?)*. */
 export function star(a: Regex): Regex {
     switch (a.kind) {
         case "empty":

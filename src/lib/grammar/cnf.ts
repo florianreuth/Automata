@@ -45,7 +45,7 @@ export function toCnf(grammar: Grammar): Grammar {
     return { start, productions: ordered.map(([left, right]) => ({ left: [left], right })) };
 }
 
-/** True if every production is A → BC, A → a, or start → ε with the start symbol never on a right side. */
+/** True if every production is A → BC, A → a, or start → λ with the start symbol never on a right side. */
 export function isCnf(grammar: Grammar): boolean {
     const startOnRight = grammar.productions.some((p) => p.right.includes(grammar.start));
     return (

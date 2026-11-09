@@ -33,7 +33,7 @@ describe("simulate", () => {
         assert.deepEqual(simulate(fa, "0").steps.map((step) => step.states.size), [1, 2]);
     });
 
-    it("applies the ε-closure", () => {
+    it("applies the λ-closure", () => {
         const fa = example("epsilon-ab");
         assert.equal(simulate(fa, "").accepted, true);
         assert.equal(simulate(fa, "aabbb").accepted, true);
@@ -43,12 +43,12 @@ describe("simulate", () => {
 });
 
 describe("stepTransitions", () => {
-    it("lists the symbol moves into a step and the ε-moves inside it", () => {
+    it("lists the symbol moves into a step and the λ-moves inside it", () => {
         const fa = example("epsilon-ab");
         const result = simulate(fa, "ab");
-        const used = (step: number) => stepTransitions(fa, result, step).map((t) => t.symbol || "ε").sort();
-        assert.deepEqual(used(0), ["ε"]);
-        assert.deepEqual(used(1), ["a", "ε"]);
+        const used = (step: number) => stepTransitions(fa, result, step).map((t) => t.symbol || "λ").sort();
+        assert.deepEqual(used(0), ["λ"]);
+        assert.deepEqual(used(1), ["a", "λ"]);
         assert.deepEqual(used(2), ["b"]);
     });
 });
@@ -123,17 +123,17 @@ describe("formalDefinition", () => {
         assert.match(definitionToLatex(definition), /\$\\rightarrow q_\{0\}\$ & \$q_\{2\}\$ & \$q_\{1\}\$ & \$q_\{3\}\$/);
     });
 
-    it("uses sets and ε for nondeterministic automata", () => {
+    it("uses sets and λ for nondeterministic automata", () => {
         const definition = formalDefinition(example("epsilon-ab"));
-        assert.equal(transitionSignature(definition), "δ: Q × (Σ ∪ {ε}) → 𝒫(Q)");
+        assert.equal(transitionSignature(definition), "δ: Q × (Σ ∪ {λ}) → 𝒫(Q)");
         assert.deepEqual(definition.columns, ["a", "b", ""]);
         assert.match(definitionToText(definition), /→\*q0 │ \{q0\} │ ∅ +│ \{q1\}/);
     });
 });
 
 describe("parseSymbols", () => {
-    it("splits labels, keeps multi-character symbols and maps ε", () => {
-        assert.deepEqual(parseSymbols("0, 1 ε"), ["0", "1", ""]);
+    it("splits labels, keeps multi-character symbols and maps λ", () => {
+        assert.deepEqual(parseSymbols("0, 1 λ"), ["0", "1", ""]);
         assert.deepEqual(parseSymbols(""), [""]);
         assert.deepEqual(parseSymbols("hallo, welt, hallo"), ["hallo", "welt"]);
     });

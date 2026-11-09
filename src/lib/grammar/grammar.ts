@@ -8,7 +8,7 @@ import { EPSILON, naturalCompare } from "../automata/machine.ts";
 /** End-of-input marker of the parsers; reserved, so it cannot be used as a terminal. */
 export const END_MARKER = "$";
 
-/** A rule left → right; an empty right side is an ε-production. */
+/** A rule left → right; an empty right side is an λ-production. */
 export interface Production {
     left: string[];
     right: string[];
@@ -39,8 +39,8 @@ export function isNonterminal(symbol: string): boolean {
 }
 
 /**
- * Parses one production per line such as "S → aSb | ε"; the left side of the first line is the start symbol.
- * Every character that is not part of a nonterminal is a terminal; ε, λ or an empty alternative stand for the empty word.
+ * Parses one production per line such as "S → aSb | λ"; the left side of the first line is the start symbol.
+ * Every character that is not part of a nonterminal is a terminal; λ, ε or an empty alternative stand for the empty word.
  */
 export function parseGrammar(source: string): { grammar: Grammar } | { errors: GrammarError[] } {
     const productions: Production[] = [];
@@ -116,7 +116,7 @@ export function linearity(grammar: Grammar): "right" | "left" | null {
     return linear("right") ? "right" : linear("left") ? "left" : null;
 }
 
-/** Joins symbols without spaces unless a multi-character nonterminal would make that ambiguous; ε if empty. */
+/** Joins symbols without spaces unless a multi-character nonterminal would make that ambiguous; λ if empty. */
 function formatSentence(symbols: readonly string[]): string {
     if (symbols.length === 0) {
         return EPSILON;
@@ -138,7 +138,7 @@ export function formatGrammar(grammar: Grammar): string {
     return [...lines].map(([left, rights]) => `${left} → ${rights.join(" | ")}`).join("\n");
 }
 
-/** Splits text into grammar symbols; ε and λ denote the empty word and are dropped. */
+/** Splits text into grammar symbols; λ and ε denote the empty word and are dropped. */
 export function tokenize(text: string): string[] {
-    return (text.match(SYMBOL) ?? []).filter((symbol) => symbol !== EPSILON && symbol !== "λ");
+    return (text.match(SYMBOL) ?? []).filter((symbol) => symbol !== EPSILON && symbol !== "ε");
 }

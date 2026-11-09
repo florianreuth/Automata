@@ -13,7 +13,7 @@ const TEXT_BASELINE = 5;
 const EDGE_GAP_BELOW = 8;
 const EDGE_GAP_ABOVE = 12;
 
-/** A node of a derivation tree; the empty symbol is an ε-leaf. */
+/** A node of a derivation tree; the empty symbol is an λ-leaf. */
 export interface ParseTree {
     symbol: string;
     children: ParseTree[];

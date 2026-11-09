@@ -18,7 +18,7 @@ export const regexExamples: RegexExample[] = [
         title: "Endet auf abb",
         description: "Klassisches Beispiel aus dem Drachenbuch.",
         source: "(a|b)*abb",
-        words: "ε\nabb\naabb\nbabb\nab\nabba",
+        words: "λ\nabb\naabb\nbabb\nab\nabba",
     },
     {
         id: "binary",
@@ -32,6 +32,6 @@ export const regexExamples: RegexExample[] = [
         title: "a* b*",
         description: "Erst beliebig viele a, dann beliebig viele b.",
         source: "a*b*",
-        words: "ε\na\naabb\nb\nba\naba",
+        words: "λ\na\naabb\nb\nba\naba",
     },
 ];

@@ -7,11 +7,11 @@ Built with [Astro](https://astro.build), [Svelte](https://svelte.dev) and TypeSc
 
 ## Features
 
-- **Finite automata** (NFA/DFA, ε-transitions, multi-character symbols): graph editor with automatic layout, step-by-step
+- **Finite automata** (NFA/DFA, λ-transitions, multi-character symbols): graph editor with automatic layout, step-by-step
   simulation and batch tests, analysis, trap state completion, NFA → DFA, minimization, conversion to regular expression
   and right-linear grammar, formal definition export (text, Markdown, LaTeX, SVG, PNG, PDF), JSON and JFLAP `.jff`
   import/export.
-- **Regular expressions**: batch tests and conversion to an ε-NFA (Thompson construction).
+- **Regular expressions**: batch tests and conversion to an λ-NFA (Thompson construction).
 - **Grammars**: Chomsky classification, Chomsky normal form, CYK, FIRST/FOLLOW sets, LL(1) parsing with derivation tree
   and regular grammar → NFA.
 

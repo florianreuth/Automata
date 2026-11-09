@@ -70,7 +70,7 @@
 
     <label class="field word">
         <span>Eingabewort (jedes Zeichen ein Terminal)</span>
-        <input bind:value={word} class="mono" placeholder="Wort eingeben, z. B. aabb (leer = ε)" spellcheck="false" autocomplete="off"/>
+        <input bind:value={word} class="mono" placeholder="Wort eingeben, z. B. aabb (leer = λ)" spellcheck="false" autocomplete="off"/>
     </label>
 
     {#if grammar === null}
@@ -118,12 +118,12 @@
                 symbols={[
                     { text: "→", hint: "Pfeil – oder einfach -> tippen" },
                     { text: "|", hint: "Trennt Alternativen" },
-                    { text: "ε", hint: "Leeres Wort – eine leere Alternative wie S -> a | geht auch" },
+                    { text: "λ", hint: "Leeres Wort – eine leere Alternative wie S -> a | geht auch" },
                 ]}
             />
             <p class="hint">
                 Pfeil als <span class="mono">-&gt;</span> tippen · Großbuchstaben (auch <span class="mono">S'</span>, <span class="mono">A1</span>) sind
-                Nichtterminale, jedes andere Zeichen ist ein Terminal · eine leere Alternative steht für ε · die erste Zeile legt das Startsymbol fest
+                Nichtterminale, jedes andere Zeichen ist ein Terminal · eine leere Alternative steht für λ · die erste Zeile legt das Startsymbol fest
             </p>
 
             {#if "errors" in parsed}

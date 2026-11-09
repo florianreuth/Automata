@@ -23,7 +23,7 @@ export interface FormalDefinition {
     initial: string | null;
     finals: string[];
     deterministic: boolean;
-    /** Table columns as stored symbols; ε ("") is appended if ε-transitions exist. */
+    /** Table columns as stored symbols; λ ("") is appended if λ-transitions exist. */
     columns: string[];
     rows: TransitionRow[];
 }
@@ -55,7 +55,7 @@ export function formalDefinition(fa: FiniteAutomaton, name = "A"): FormalDefinit
     };
 }
 
-/** Formats the signature of δ depending on determinism and ε-transitions, e.g. "δ: Q × Σ → 𝒫(Q)". */
+/** Formats the signature of δ depending on determinism and λ-transitions, e.g. "δ: Q × Σ → 𝒫(Q)". */
 export function transitionSignature(definition: FormalDefinition): string {
     if (definition.deterministic) {
         return "δ: Q × Σ → Q";

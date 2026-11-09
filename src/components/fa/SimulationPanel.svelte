@@ -110,7 +110,7 @@
             {#each result.input as symbol, i (i)}
                 <span class:read={i < step} class:head={i === step} class:stuck={blocked && i === blocked.position - 1 && step >= blocked.position}>{symbol}</span>
             {:else}
-                <span class="head">ε</span>
+                <span class="head">λ</span>
             {/each}
             {#if result.input.length > 0}
                 <span class="end" class:head={finished}>&nbsp;</span>
@@ -145,7 +145,7 @@
         {/if}
     {:else if input.length > 0 || hasInitial}
         <p class="verdict" class:accepted={result.accepted} class:rejected={!result.accepted}>
-            „{input === "" ? "ε" : input}“ wird {result.accepted ? "akzeptiert" : "abgelehnt"}{#if blocked}{" "}– beim {blocked.position}. Symbol „{blocked.symbol}“ fehlt ein Übergang aus <span class="mono">{blocked.from}</span>{/if}.
+            „{input === "" ? "λ" : input}“ wird {result.accepted ? "akzeptiert" : "abgelehnt"}{#if blocked}{" "}– beim {blocked.position}. Symbol „{blocked.symbol}“ fehlt ein Übergang aus <span class="mono">{blocked.from}</span>{/if}.
         </p>
     {/if}
 </section>

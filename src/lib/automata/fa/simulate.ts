@@ -10,7 +10,7 @@ import { alphabetOf, type FaTransition, type FiniteAutomaton, initialStateOf } f
 export interface SimulationStep {
     /** Number of input symbols consumed so far. */
     position: number;
-    /** Active state ids, already closed under ε-transitions. */
+    /** Active state ids, already closed under λ-transitions. */
     states: ReadonlySet<string>;
 }
 
@@ -22,7 +22,7 @@ export interface SimulationResult {
     unknownSymbols: string[];
 }
 
-/** Extends a set of states by everything reachable via ε-transitions, including the start states. */
+/** Extends a set of states by everything reachable via λ-transitions, including the start states. */
 export function epsilonClosure(fa: FiniteAutomaton, states: Iterable<string>): Set<string> {
     const closure = new Set(states);
     const stack = [...closure];
@@ -38,7 +38,7 @@ export function epsilonClosure(fa: FiniteAutomaton, states: Iterable<string>): S
     return closure;
 }
 
-/** Successors of the given states on one non-empty symbol, without ε-closure. */
+/** Successors of the given states on one non-empty symbol, without λ-closure. */
 export function move(fa: FiniteAutomaton, states: ReadonlySet<string>, symbol: string): Set<string> {
     const result = new Set<string>();
     for (const transition of fa.transitions) {
@@ -92,7 +92,7 @@ export function blockedStep(result: SimulationResult): { position: number; symbo
 }
 
 /**
- * Transitions taken to reach a step: the symbol moves from the previous step plus the ε-moves inside its closure.
+ * Transitions taken to reach a step: the symbol moves from the previous step plus the λ-moves inside its closure.
  * @param step index into {@link SimulationResult.steps}, clamped to the last step
  */
 export function stepTransitions(fa: FiniteAutomaton, result: SimulationResult, step: number): FaTransition[] {
@@ -105,7 +105,7 @@ export function stepTransitions(fa: FiniteAutomaton, result: SimulationResult, s
     );
 }
 
-/** State/symbol pairs on which a run dies (a missing trap state); a symbol readable after an ε-move is not reported. */
+/** State/symbol pairs on which a run dies (a missing trap state); a symbol readable after an λ-move is not reported. */
 export function missingTransitions(fa: FiniteAutomaton): { state: StateNode; symbol: string }[] {
     const alphabet = alphabetOf(fa);
     return [...fa.states]

@@ -55,7 +55,7 @@
                 ? "Deterministisch (DEA), vollständig"
                 : "Deterministisch (DEA), partiell"
             : hasEpsilon
-              ? "Nichtdeterministisch mit ε-Übergängen (ε-NEA)"
+              ? "Nichtdeterministisch mit λ-Übergängen (λ-NEA)"
               : "Nichtdeterministisch (NEA)",
     );
 </script>

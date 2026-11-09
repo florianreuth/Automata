@@ -102,7 +102,7 @@ function latexState(name: string): string {
 
 function latexSymbol(symbol: string): string {
     if (symbol === "") {
-        return "\\varepsilon";
+        return "\\lambda";
     }
     return /^[A-Za-z0-9]$/.test(symbol) ? symbol : `\\text{${latexText(symbol)}}`;
 }

@@ -12,8 +12,8 @@ const START_SYMBOL = "S";
 const NONTERMINAL_LETTERS = [..."ABCDEFGHIJKLMNOPQRSTUVWXYZ"].filter((letter) => letter !== START_SYMBOL);
 
 /**
- * Converts an automaton into an equivalent right-linear grammar: q -a→ p becomes Q → aP, q -ε→ p becomes Q → P
- * and a final state Q gets Q → ε. The initial state is S, the other reachable states follow as A, B, …, A1, B1, …
+ * Converts an automaton into an equivalent right-linear grammar: q -a→ p becomes Q → aP, q -λ→ p becomes Q → P
+ * and a final state Q gets Q → λ. The initial state is S, the other reachable states follow as A, B, …, A1, B1, …
  * @throws Error if there is no initial state, the language is trivially empty or a symbol cannot be written as a terminal
  */
 export function faToGrammar(fa: FiniteAutomaton): Grammar {
@@ -23,7 +23,7 @@ export function faToGrammar(fa: FiniteAutomaton): Grammar {
     }
     for (const symbol of new Set(fa.transitions.map((t) => t.symbol))) {
         if (!isTerminalText(symbol)) {
-            throw new Error(`Das Symbol „${symbol}“ lässt sich nicht als Terminal schreiben (keine Großbuchstaben, Leerzeichen, |, ${END_MARKER}, ε oder λ).`);
+            throw new Error(`Das Symbol „${symbol}“ lässt sich nicht als Terminal schreiben (keine Großbuchstaben, Leerzeichen, |, ${END_MARKER}, λ oder ε).`);
         }
     }
 
@@ -58,7 +58,7 @@ export function faToGrammar(fa: FiniteAutomaton): Grammar {
 }
 
 /**
- * Converts a regular grammar into an equivalent ε-NFA with one state per nonterminal, named after it, and q0, q1, … in between.
+ * Converts a regular grammar into an equivalent λ-NFA with one state per nonterminal, named after it, and q0, q1, … in between.
  * Right-linear A → wB becomes a path A -w→ B from S; left-linear A → Bw becomes B -w→ A from a new initial state, ending in S.
  * @throws Error if the grammar is neither right- nor left-linear
  */

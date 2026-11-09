@@ -33,7 +33,7 @@
     {/if}
     <p class="hint">
         Schritte: neues Startsymbol, Terminale in eigene Regeln (T1, T2, …), lange Regeln aufteilen (X1, X2, …),
-        ε-Regeln und Kettenregeln entfernen, nutzlose Nichtterminale streichen.
+        λ-Regeln und Kettenregeln entfernen, nutzlose Nichtterminale streichen.
     </p>
 </section>
 

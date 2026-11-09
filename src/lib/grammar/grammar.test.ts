@@ -24,13 +24,13 @@ const example = (id: string) => grammarOf(grammarExamples.find((e) => e.id === i
 const yieldOf = (tree: ParseTree): string => (tree.children.length === 0 ? tree.symbol : tree.children.map(yieldOf).join(""));
 
 describe("parseGrammar", () => {
-    it("reads alternatives, ε and multi-character nonterminals", () => {
+    it("reads alternatives, λ and multi-character nonterminals", () => {
         const grammar = example("expressions");
         assert.equal(grammar.start, "E");
         assert.equal(grammar.productions.length, 8);
         assert.deepEqual(tokenize("+TE'"), ["+", "T", "E'"]);
         assert.deepEqual(grammarOf("S -> a | ").productions.map((p) => p.right), [["a"], []]);
-        assert.equal(formatGrammar(grammarOf("S → aSb\nS → ε")), "S → aSb | ε");
+        assert.equal(formatGrammar(grammarOf("S → aSb\nS → λ")), "S → aSb | λ");
     });
 
     it("reports errors per line", () => {
@@ -112,7 +112,7 @@ describe("layoutTree", () => {
         const layout = layoutTree({ symbol: "S", children: [{ symbol: "a", children: [] }, { symbol: "", children: [] }] });
         const [a, epsilon, root] = layout.nodes;
         assert.equal(root.x, (a.x + epsilon.x) / 2);
-        assert.equal(epsilon.label, "ε");
+        assert.equal(epsilon.label, "λ");
         assert.ok(root.y < a.y);
     });
 });
@@ -120,9 +120,9 @@ describe("layoutTree", () => {
 describe("faToGrammar", () => {
     const faExample = (id: string) => faExamples.find((e) => e.id === id)!.create();
 
-    it("writes transitions, ε-moves and final states as right-linear productions", () => {
-        assert.equal(formatGrammar(faToGrammar(faExample("ends-with-01"))), "S → 0S | 0A | 1S\nA → 1B\nB → ε");
-        assert.equal(formatGrammar(faToGrammar(faExample("epsilon-ab"))), "S → aS | A | ε\nA → bA | ε");
+    it("writes transitions, λ-moves and final states as right-linear productions", () => {
+        assert.equal(formatGrammar(faToGrammar(faExample("ends-with-01"))), "S → 0S | 0A | 1S\nA → 1B\nB → λ");
+        assert.equal(formatGrammar(faToGrammar(faExample("epsilon-ab"))), "S → aS | A | λ\nA → bA | λ");
     });
 
     it("produces a regular grammar for the same language", () => {
@@ -162,11 +162,11 @@ describe("grammarToFa", () => {
     });
 
     it("splits multi-terminal right sides into paths", () => {
-        accepts("S → abS | c | A\nA → ε", { "": true, c: true, abc: true, ababc: true, ab: true, a: false, ac: false, cc: false });
+        accepts("S → abS | c | A\nA → λ", { "": true, c: true, abc: true, ababc: true, ab: true, a: false, ac: false, cc: false });
     });
 
     it("handles left-linear grammars", () => {
-        accepts("S → Sa | Bb\nB → Bb | ε", { b: true, bbb: true, ba: true, bbaa: true, "": false, a: false, ab: false, bab: false });
+        accepts("S → Sa | Bb\nB → Bb | λ", { b: true, bbb: true, ba: true, bbaa: true, "": false, a: false, ab: false, bab: false });
     });
 
     it("rejects grammars that are not regular", () => {

@@ -16,7 +16,7 @@ export class FaEditor implements GraphEditor<FaTransition> {
     machine = $state<FiniteAutomaton>(createFiniteAutomaton());
     tool = $state<Tool>("select");
     selection = $state<Selection>(null);
-    readonly edgeHint = "z. B. 0, 1, hallo – leer für ε";
+    readonly edgeHint = "z. B. 0, 1, hallo – leer für λ";
 
     #undo = $state<FiniteAutomaton[]>([]);
     #redo = $state<FiniteAutomaton[]>([]);

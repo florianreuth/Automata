@@ -5,7 +5,7 @@
 
 import { type Edge, EPSILON, type Machine, naturalCompare, type StateNode } from "../machine.ts";
 
-/** A single FA transition; an empty symbol is an ε-transition. */
+/** A single FA transition; an empty symbol is an λ-transition. */
 export interface FaTransition extends Edge {
     symbol: string;
 }
@@ -18,7 +18,7 @@ export function createFiniteAutomaton(title = "Unbenannter Automat"): FiniteAuto
     return { kind: "fa", title, states: [], transitions: [] };
 }
 
-/** Sorted input alphabet, collected from all non-ε transitions. */
+/** Sorted input alphabet, collected from all non-λ transitions. */
 export function alphabetOf(fa: FiniteAutomaton): string[] {
     const symbols = new Set(fa.transitions.map((t) => t.symbol).filter((symbol) => symbol !== ""));
     return [...symbols].sort(naturalCompare);
@@ -48,7 +48,7 @@ export function unreachableStates(fa: FiniteAutomaton): StateNode[] {
     return fa.states.filter((state) => !reached.has(state.id));
 }
 
-/** True if there are no ε-transitions and every state has at most one successor per symbol. */
+/** True if there are no λ-transitions and every state has at most one successor per symbol. */
 export function isDeterministic(fa: FiniteAutomaton): boolean {
     const seen = new Set<string>();
     for (const transition of fa.transitions) {
@@ -73,21 +73,21 @@ export function isComplete(fa: FiniteAutomaton): boolean {
     return fa.states.every((state) => alphabet.every((symbol) => fa.transitions.some((t) => t.from === state.id && t.symbol === symbol)));
 }
 
-/** Formats a stored symbol for display, the empty string becomes ε. */
+/** Formats a stored symbol for display, the empty string becomes λ. */
 export function displaySymbol(symbol: string): string {
     return symbol === "" ? EPSILON : symbol;
 }
 
-/** Parses an edge label such as "0, 1, hallo, ε" into distinct stored symbols; an empty label is ε. */
+/** Parses an edge label such as "0, 1, hallo, λ" into distinct stored symbols; an empty label is λ. */
 export function parseSymbols(input: string): string[] {
     const parts = input.split(/[,\s]+/).filter((part) => part.length > 0);
     if (parts.length === 0) {
         return [""];
     }
-    return [...new Set(parts.map((part) => (part === EPSILON || part === "λ" || part.toLowerCase() === "eps" ? "" : part)))];
+    return [...new Set(parts.map((part) => (part === EPSILON || part === "ε" || part.toLowerCase() === "eps" ? "" : part)))];
 }
 
-/** Formats stored symbols as an edge label such as "0, 1, ε". */
+/** Formats stored symbols as an edge label such as "0, 1, λ". */
 export function formatSymbols(symbols: readonly string[]): string {
     return [...symbols].sort(compareSymbols).map(displaySymbol).join(", ");
 }
@@ -96,7 +96,7 @@ export function transitionLabel(transitions: readonly FaTransition[]): string {
     return formatSymbols(transitions.map((t) => t.symbol));
 }
 
-/** Sorts ε last and everything else naturally. */
+/** Sorts λ last and everything else naturally. */
 export function compareSymbols(a: string, b: string): number {
     if (a === "" || b === "") {
         return a === b ? 0 : a === "" ? 1 : -1;

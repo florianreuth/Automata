@@ -17,7 +17,7 @@ export class RegexSyntaxError extends Error {
 }
 
 /**
- * Parses a regular expression with |, *, +, ?, parentheses, ε, ∅ and \ for literal operators; whitespace is ignored.
+ * Parses a regular expression with |, *, +, ?, parentheses, λ, ∅ and \ for literal operators; whitespace is ignored.
  * @throws RegexSyntaxError with a German message
  */
 export function parseRegex(source: string): Regex {
@@ -96,7 +96,7 @@ class RegexParser {
                 return inner;
             }
             case EPSILON:
-            case "λ":
+            case "ε":
                 return EPSILON_REGEX;
             case EMPTY_SET:
                 return EMPTY;

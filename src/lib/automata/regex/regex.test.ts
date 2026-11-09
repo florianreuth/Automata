@@ -33,9 +33,9 @@ describe("simplification", () => {
     it("removes neutral elements and duplicates", () => {
         const a = symbol("a");
         assert.equal(formatRegex(union(a, union(parseRegex("∅"), a))), "a");
-        assert.equal(formatRegex(concat(parseRegex("ε"), concat(a, parseRegex("b")))), "ab");
+        assert.equal(formatRegex(concat(parseRegex("λ"), concat(a, parseRegex("b")))), "ab");
         assert.equal(formatRegex(star(star(parseRegex("a+")))), "a*");
-        assert.equal(formatRegex(union(parseRegex("ε"), parseRegex("a*"))), "a*");
+        assert.equal(formatRegex(union(parseRegex("λ"), parseRegex("a*"))), "a*");
     });
 
     it("groups multi-character symbols under postfix operators", () => {
@@ -54,7 +54,7 @@ describe("regexToNfa", () => {
         assert.equal(accepts("a+b?", ""), false);
         assert.equal(accepts("a+b?", "aab"), true);
         assert.equal(accepts("∅", ""), false);
-        assert.equal(accepts("ε", ""), true);
+        assert.equal(accepts("λ", ""), true);
     });
 
     it("numbers states from the initial q0", () => {
