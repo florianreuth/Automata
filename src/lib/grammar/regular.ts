@@ -3,10 +3,10 @@
 //
 // Copyright (c) 2026 Florian Reuth <git@florianreuth.de>
 
-import {compareSymbols, type FaTransition, type FiniteAutomaton, initialStateOf, unreachableStates} from "../automata/fa/model.ts";
-import {createId, naturalCompare, nextStateName, type StateNode} from "../automata/machine.ts";
-import {applyLayout} from "../graph/layout.ts";
-import {END_MARKER, type Grammar, isNonterminal, linearity, nonterminalsOf, type Production, tokenize} from "./grammar.ts";
+import { compareSymbols, type FaTransition, type FiniteAutomaton, requireInitialState, unreachableStates } from "../automata/fa/model.ts";
+import { createId, naturalCompare, nextStateName, type StateNode } from "../automata/machine.ts";
+import { applyLayout } from "../graph/layout.ts";
+import { END_MARKER, type Grammar, isNonterminal, linearity, nonterminalsOf, type Production, tokenize } from "./grammar.ts";
 
 const START_SYMBOL = "S";
 const NONTERMINAL_LETTERS = [..."ABCDEFGHIJKLMNOPQRSTUVWXYZ"].filter((letter) => letter !== START_SYMBOL);
@@ -17,10 +17,7 @@ const NONTERMINAL_LETTERS = [..."ABCDEFGHIJKLMNOPQRSTUVWXYZ"].filter((letter) =>
  * @throws Error if there is no initial state, the language is trivially empty or a symbol cannot be written as a terminal
  */
 export function faToGrammar(fa: FiniteAutomaton): Grammar {
-    const initial = initialStateOf(fa);
-    if (!initial) {
-        throw new Error("Der Automat hat keinen Startzustand.");
-    }
+    const initial = requireInitialState(fa);
     for (const symbol of new Set(fa.transitions.map((t) => t.symbol))) {
         if (!isTerminalText(symbol)) {
             throw new Error(`Das Symbol „${symbol}“ lässt sich nicht als Terminal schreiben (keine Großbuchstaben, Leerzeichen, |, ${END_MARKER}, λ oder ε).`);
@@ -44,17 +41,17 @@ export function faToGrammar(fa: FiniteAutomaton): Grammar {
             const key = right.join("\u0000");
             if (!seen.has(key)) {
                 seen.add(key);
-                productions.push({left, right});
+                productions.push({ left, right });
             }
         }
         if (state.final) {
-            productions.push({left, right: []});
+            productions.push({ left, right: [] });
         }
     }
     if (productions.length === 0) {
         throw new Error("Der Automat akzeptiert kein Wort, daher gibt es keine Produktionen.");
     }
-    return {start: START_SYMBOL, productions};
+    return { start: START_SYMBOL, productions };
 }
 
 /**
@@ -70,14 +67,14 @@ export function grammarToFa(grammar: Grammar, title: string): FiniteAutomaton {
     const states: StateNode[] = [];
     const transitions: FaTransition[] = [];
     const addState = (name = nextStateName(states)) => {
-        const state = {id: createId(), name, x: 0, y: 0, initial: false, final: false};
+        const state = { id: createId(), name, x: 0, y: 0, initial: false, final: false };
         states.push(state);
         return state;
     };
     const path = (from: StateNode, word: readonly string[], to: StateNode) => {
         const stops = [from, ...word.slice(1).map(() => addState()), to];
         for (const [i, symbol] of (word.length === 0 ? [""] : word).entries()) {
-            transitions.push({id: createId(), from: stops[i].id, to: stops[i + 1].id, symbol});
+            transitions.push({ id: createId(), from: stops[i].id, to: stops[i + 1].id, symbol });
         }
     };
 
@@ -86,7 +83,7 @@ export function grammarToFa(grammar: Grammar, title: string): FiniteAutomaton {
     let accept: StateNode | undefined;
     if (side === "right") {
         start.initial = true;
-        for (const {left, right} of grammar.productions) {
+        for (const { left, right } of grammar.productions) {
             const from = nonterminals.get(left[0])!;
             const last = right.at(-1);
             if (last !== undefined && isNonterminal(last)) {
@@ -105,7 +102,7 @@ export function grammarToFa(grammar: Grammar, title: string): FiniteAutomaton {
         const initial = addState();
         initial.initial = true;
         start.final = true;
-        for (const {left, right} of grammar.productions) {
+        for (const { left, right } of grammar.productions) {
             const to = nonterminals.get(left[0])!;
             const first = right[0];
             if (first !== undefined && isNonterminal(first)) {
@@ -116,7 +113,7 @@ export function grammarToFa(grammar: Grammar, title: string): FiniteAutomaton {
         }
     }
     applyLayout(states, transitions);
-    return {kind: "fa", title, states, transitions};
+    return { kind: "fa", title, states, transitions };
 }
 
 function nonterminalName(index: number): string {

@@ -28,6 +28,15 @@ export function initialStateOf(fa: FiniteAutomaton): StateNode | undefined {
     return fa.states.find((state) => state.initial);
 }
 
+/** @throws Error with a German message if no initial state is marked */
+export function requireInitialState(fa: FiniteAutomaton): StateNode {
+    const initial = initialStateOf(fa);
+    if (!initial) {
+        throw new Error("Der Automat hat keinen Startzustand.");
+    }
+    return initial;
+}
+
 /** States without a path from the initial state; empty if no initial state is marked. */
 export function unreachableStates(fa: FiniteAutomaton): StateNode[] {
     const initial = initialStateOf(fa);

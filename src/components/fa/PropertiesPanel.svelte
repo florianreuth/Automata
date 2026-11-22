@@ -7,7 +7,7 @@
 
 <script lang="ts">
     import { formatSet, naturalCompare } from "../../lib/automata/machine.ts";
-    import { alphabetOf, type FiniteAutomaton, isComplete, isDeterministic, unreachableStates } from "../../lib/automata/fa/model.ts";
+    import { alphabetOf, type FiniteAutomaton, initialStateOf, isComplete, isDeterministic, unreachableStates } from "../../lib/automata/fa/model.ts";
     import { missingTransitions } from "../../lib/automata/fa/simulate.ts";
     import { faToRegex } from "../../lib/automata/regex/convert.ts";
     import { formatRegex } from "../../lib/automata/regex/regex.ts";
@@ -28,7 +28,7 @@
     const complete = $derived(isComplete(fa));
     const hasEpsilon = $derived(fa.transitions.some((t) => t.symbol === ""));
     const alphabet = $derived(alphabetOf(fa));
-    const initial = $derived(fa.states.find((state) => state.initial));
+    const initial = $derived(initialStateOf(fa));
     const finals = $derived(fa.states.filter((state) => state.final).map((state) => state.name).sort(naturalCompare));
 
     const unreachable = $derived(unreachableStates(fa).map((state) => state.name).sort(naturalCompare));

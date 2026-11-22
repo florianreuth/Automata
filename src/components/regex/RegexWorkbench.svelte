@@ -14,7 +14,6 @@
     import type { Regex } from "../../lib/automata/regex/regex.ts";
     import { renderMachineSvg } from "../../lib/graph/svg.ts";
     import { handOffAutomaton } from "../../lib/io/handoff.ts";
-    import { withBase } from "../../lib/paths.ts";
     import { measureText } from "../../lib/ui/measure.ts";
     import BatchPanel from "../fa/BatchPanel.svelte";
     import Dropdown, { type DropdownItem } from "../ui/Dropdown.svelte";
@@ -53,9 +52,6 @@
 
     function openInEditor() {
         handOffFailed = !(nfa && handOffAutomaton(nfa));
-        if (!handOffFailed) {
-            window.location.href = withBase("/endlicher-automat");
-        }
     }
 </script>
 

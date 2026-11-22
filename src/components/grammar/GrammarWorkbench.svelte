@@ -12,7 +12,6 @@
     import { grammarToFa } from "../../lib/grammar/regular.ts";
     import { loadAutosave, storeAutosave } from "../../lib/io/autosave.ts";
     import { handOffAutomaton } from "../../lib/io/handoff.ts";
-    import { withBase } from "../../lib/paths.ts";
     import { autoReplace } from "../../lib/ui/text-input.ts";
     import Dropdown, { type DropdownItem } from "../ui/Dropdown.svelte";
     import SymbolBar from "../ui/SymbolBar.svelte";
@@ -52,9 +51,6 @@
 
     function openAsAutomaton() {
         handOffFailed = !(grammar && handOffAutomaton(grammarToFa(grammar, "NEA zur Grammatik")));
-        if (!handOffFailed) {
-            window.location.href = withBase("/endlicher-automat");
-        }
     }
 
     function parseSaved(json: string): { source: string; word: string } | null {

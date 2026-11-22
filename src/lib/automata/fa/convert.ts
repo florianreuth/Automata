@@ -5,7 +5,7 @@
 
 import { applyLayout } from "../../graph/layout.ts";
 import { createId, formatSet, naturalCompare, nextStateName, type StateNode } from "../machine.ts";
-import { alphabetOf, type FaTransition, type FiniteAutomaton, initialStateOf, isDeterministic } from "./model.ts";
+import { alphabetOf, type FaTransition, type FiniteAutomaton, isDeterministic, requireInitialState } from "./model.ts";
 import { epsilonClosure, missingTransitions, move } from "./simulate.ts";
 
 const TRAP_DISTANCE = 200;
@@ -16,10 +16,7 @@ const TRAP_DISTANCE = 200;
  * @throws Error if the automaton has no initial state
  */
 export function toDfa(fa: FiniteAutomaton): FiniteAutomaton {
-    const initial = initialStateOf(fa);
-    if (!initial) {
-        throw new Error("Der Automat hat keinen Startzustand.");
-    }
+    const initial = requireInitialState(fa);
     const alphabet = alphabetOf(fa);
     const names = new Map(fa.states.map((state) => [state.id, state.name]));
     const finals = new Set(fa.states.filter((state) => state.final).map((state) => state.id));
@@ -100,10 +97,7 @@ export function addTrapState(fa: FiniteAutomaton): FiniteAutomaton {
 export function minimizeDfa(fa: FiniteAutomaton): FiniteAutomaton {
     const deterministic = isDeterministic(fa);
     const dfa = deterministic ? fa : toDfa(fa);
-    const initial = initialStateOf(dfa);
-    if (!initial) {
-        throw new Error("Der Automat hat keinen Startzustand.");
-    }
+    const initial = requireInitialState(dfa);
     const alphabet = alphabetOf(dfa);
     const { states, delta } = reachableTable(dfa, initial, alphabet);
     const blocks = refinePartition(states.map((state) => state?.final ?? false), delta);

@@ -4,18 +4,21 @@
 // Copyright (c) 2026 Florian Reuth <git@florianreuth.de>
 
 import type { FiniteAutomaton } from "../automata/fa/model.ts";
+import { withBase } from "../paths.ts";
 import { faFromJson, faToJson } from "./document.ts";
 
 const HANDOFF_KEY = "automata:fa:handoff";
+const FA_EDITOR_PATH = "/endlicher-automat";
 
-/** Hands an automaton to the FA editor page in this tab; false if session storage is unavailable. */
+/** Opens an automaton in the FA editor page in this tab; false, without navigating, if session storage is unavailable. */
 export function handOffAutomaton(fa: FiniteAutomaton): boolean {
     try {
         sessionStorage.setItem(HANDOFF_KEY, faToJson(fa));
-        return true;
     } catch {
         return false;
     }
+    window.location.href = withBase(FA_EDITOR_PATH);
+    return true;
 }
 
 /** Takes the handed-off automaton exactly once; null if there is none. */

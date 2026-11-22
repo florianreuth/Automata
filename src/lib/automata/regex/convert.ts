@@ -5,7 +5,7 @@
 
 import { applyLayout } from "../../graph/layout.ts";
 import { createId, naturalCompare, type StateNode } from "../machine.ts";
-import { type FaTransition, type FiniteAutomaton, initialStateOf } from "../fa/model.ts";
+import { type FaTransition, type FiniteAutomaton, requireInitialState } from "../fa/model.ts";
 import { concat, EMPTY, EPSILON_REGEX, type Regex, star, symbol, union } from "./regex.ts";
 
 const SOURCE = "#source";
@@ -80,10 +80,7 @@ export function regexToNfa(regex: Regex, title: string): FiniteAutomaton {
  * @throws Error if the automaton has no initial state
  */
 export function faToRegex(fa: FiniteAutomaton): Regex {
-    const initial = initialStateOf(fa);
-    if (!initial) {
-        throw new Error("Der Automat hat keinen Startzustand.");
-    }
+    const initial = requireInitialState(fa);
     const edges = new Map<string, Map<string, Regex>>();
     const add = (from: string, to: string, regex: Regex) => {
         const row = edges.get(from) ?? new Map<string, Regex>();
