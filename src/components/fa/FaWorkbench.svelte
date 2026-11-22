@@ -101,11 +101,11 @@
     }
 
     async function openFile() {
-        const file = await pickTextFile(AUTOMATON_FILE_TYPES);
-        if (!file) {
-            return;
-        }
         try {
+            const file = await pickTextFile(AUTOMATON_FILE_TYPES);
+            if (!file) {
+                return;
+            }
             await load(faFromFile(file.name, file.text));
             toast.show(`„${file.name}“ geöffnet.`);
         } catch (error) {

@@ -3,7 +3,7 @@
 //
 // Copyright (c) 2026 Florian Reuth <git@florianreuth.de>
 
-import { EPSILON, naturalCompare } from "../automata/machine.ts";
+import { EPSILON, EPSILON_ALIAS, naturalCompare } from "../automata/machine.ts";
 
 /** End-of-input marker of the parsers; reserved, so it cannot be used as a terminal. */
 export const END_MARKER = "$";
@@ -140,5 +140,5 @@ export function formatGrammar(grammar: Grammar): string {
 
 /** Splits text into grammar symbols; λ and ε denote the empty word and are dropped. */
 export function tokenize(text: string): string[] {
-    return (text.match(SYMBOL) ?? []).filter((symbol) => symbol !== EPSILON && symbol !== "ε");
+    return (text.match(SYMBOL) ?? []).filter((symbol) => symbol !== EPSILON && symbol !== EPSILON_ALIAS);
 }

@@ -42,15 +42,22 @@ export function printHtml(title: string, body: string, css: string): void {
     document.body.append(frame);
 }
 
-/** Lets the user pick a local file and reads it as text; resolves to null if the dialog was cancelled. */
+/** Lets the user pick a local file and reads it as text; null if the dialog was cancelled, rejects with a German Error if reading fails. */
 export function pickTextFile(accept: string): Promise<{ name: string; text: string } | null> {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
         const input = document.createElement("input");
         input.type = "file";
         input.accept = accept;
-        input.addEventListener("change", async () => {
+        input.addEventListener("change", () => {
             const file = input.files?.[0];
-            resolve(file ? { name: file.name, text: await file.text() } : null);
+            if (!file) {
+                resolve(null);
+                return;
+            }
+            file.text().then(
+                (text) => resolve({ name: file.name, text }),
+                () => reject(new Error(`„${file.name}“ konnte nicht gelesen werden.`)),
+            );
         });
         input.addEventListener("cancel", () => resolve(null));
         input.click();

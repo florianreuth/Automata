@@ -7,7 +7,7 @@
 
 <script lang="ts">
     import { untrack } from "svelte";
-    import { EPSILON } from "../../lib/automata/machine.ts";
+    import { EPSILON, EPSILON_ALIAS } from "../../lib/automata/machine.ts";
     import type { FiniteAutomaton } from "../../lib/automata/fa/model.ts";
     import { simulate } from "../../lib/automata/fa/simulate.ts";
 
@@ -27,7 +27,7 @@
             .map((line) => line.trim())
             .filter((line) => line.length > 0)
             .map((line) => {
-                const word = line === EPSILON ? "" : line;
+                const word = line === EPSILON || line === EPSILON_ALIAS ? "" : line;
                 return { line, accepted: simulate(fa, word).accepted };
             }),
     );

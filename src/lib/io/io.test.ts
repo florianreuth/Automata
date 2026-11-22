@@ -25,6 +25,15 @@ describe("JSON documents", () => {
         assert.throws(() => faFromJson("{"), /kein gültiges JSON/);
         assert.throws(() => faFromJson(JSON.stringify({ ...valid, version: 99 })), /neuere Version/);
         assert.throws(() => faFromJson(JSON.stringify(dangling)), /fehlerhafte Zustände oder Übergänge/);
+        for (const machine of [{ ...valid.machine, states: [null] }, { ...valid.machine, transitions: [null] }]) {
+            assert.throws(() => faFromJson(JSON.stringify({ ...valid, machine })), /fehlerhafte Zustände oder Übergänge/);
+        }
+    });
+
+    it("keep only the first initial state", () => {
+        const fa = example("ends-with-01");
+        fa.states.forEach((state) => (state.initial = true));
+        assert.deepEqual(faFromJson(faToJson(fa)).states.map((state) => state.initial), fa.states.map((_, i) => i === 0));
     });
 
     it("rename repeated state names", () => {

@@ -3,7 +3,7 @@
 //
 // Copyright (c) 2026 Florian Reuth <git@florianreuth.de>
 
-import { createId, withUniqueNames } from "../automata/machine.ts";
+import { createId, withSingleInitial, withUniqueNames } from "../automata/machine.ts";
 import type { FiniteAutomaton } from "../automata/fa/model.ts";
 import { escapeMarkup } from "../markup.ts";
 
@@ -61,10 +61,8 @@ export function faFromJff(xml: string, title: string): FiniteAutomaton {
             final: element.querySelector("final") !== null,
         };
     });
-    let initialSeen = false;
-    for (const state of states) {
-        state.initial = state.initial && !initialSeen;
-        initialSeen ||= state.initial;
+    if (!states.every((state) => Number.isFinite(state.x) && Number.isFinite(state.y))) {
+        throw new Error("Ein Zustand hat keine gültige Position.");
     }
     const transitions = [...document.querySelectorAll("transition")].map((element) => {
         const from = ids.get(element.querySelector("from")?.textContent?.trim() ?? "");
@@ -75,5 +73,5 @@ export function faFromJff(xml: string, title: string): FiniteAutomaton {
         }
         return { id: createId(), from, to, symbol };
     });
-    return { kind: "fa", title, states: withUniqueNames(states), transitions };
+    return { kind: "fa", title, states: withUniqueNames(withSingleInitial(states)), transitions };
 }

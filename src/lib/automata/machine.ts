@@ -5,6 +5,8 @@
 
 /** Display symbol for the empty word. Stored internally as the empty string, like JFLAP does. */
 export const EPSILON = "λ";
+/** Alternative input notation for the empty word, accepted wherever λ is. */
+export const EPSILON_ALIAS = "ε";
 
 /** A state as drawn on the canvas; shared by all machine types. */
 export interface StateNode {
@@ -66,6 +68,12 @@ export function withUniqueNames<S extends StateNode>(states: readonly S[]): S[] 
         used.add(name);
         return { ...state, name };
     });
+}
+
+/** Keeps only the first initial state marked as initial, since a machine has at most one. */
+export function withSingleInitial<S extends StateNode>(states: readonly S[]): S[] {
+    const first = states.findIndex((state) => state.initial);
+    return states.map((state, i) => (state.initial && i !== first ? { ...state, initial: false } : state));
 }
 
 /** Proposes the lowest unused state name prefix + n. */

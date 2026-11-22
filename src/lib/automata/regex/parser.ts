@@ -3,7 +3,7 @@
 //
 // Copyright (c) 2026 Florian Reuth <git@florianreuth.de>
 
-import { EPSILON } from "../machine.ts";
+import { EPSILON, EPSILON_ALIAS } from "../machine.ts";
 import { EMPTY, EMPTY_SET, EPSILON_REGEX, POSTFIX_OPERATORS, type Regex, symbol } from "./regex.ts";
 
 /** A syntax error with the zero-based code point position in the source. */
@@ -96,7 +96,7 @@ class RegexParser {
                 return inner;
             }
             case EPSILON:
-            case "ε":
+            case EPSILON_ALIAS:
                 return EPSILON_REGEX;
             case EMPTY_SET:
                 return EMPTY;

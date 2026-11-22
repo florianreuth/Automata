@@ -4,7 +4,7 @@
 // Copyright (c) 2026 Florian Reuth <git@florianreuth.de>
 
 import type { FiniteAutomaton } from "../automata/fa/model.ts";
-import { withUniqueNames } from "../automata/machine.ts";
+import { withSingleInitial, withUniqueNames } from "../automata/machine.ts";
 
 const FORMAT = "automata";
 const VERSION = 1;
@@ -29,17 +29,23 @@ export function faFromJson(json: string): FiniteAutomaton {
     if (machine?.kind !== "fa" || !Array.isArray(machine.states) || !Array.isArray(machine.transitions)) {
         throw new Error("Die Datei enthält keinen endlichen Automaten.");
     }
-    const ids = new Set(machine.states.map((state) => state.id));
-    const valid =
-        machine.states.every((s) => typeof s.id === "string" && typeof s.name === "string" && Number.isFinite(s.x) && Number.isFinite(s.y)) &&
-        machine.transitions.every((t) => ids.has(t.from) && ids.has(t.to) && typeof t.symbol === "string");
+    const statesValid = machine.states.every(
+        (s) => isObject(s) && typeof s.id === "string" && typeof s.name === "string" && Number.isFinite(s.x) && Number.isFinite(s.y),
+    );
+    const ids = new Set(statesValid ? machine.states.map((state) => state.id) : []);
+    const valid = statesValid && machine.transitions.every((t) => isObject(t) && ids.has(t.from) && ids.has(t.to) && typeof t.symbol === "string");
     if (!valid) {
         throw new Error("Die Datei enthält fehlerhafte Zustände oder Übergänge.");
     }
+    const states = machine.states.map((s) => ({ ...s, initial: Boolean(s.initial), final: Boolean(s.final) }));
     return {
         kind: "fa",
         title: typeof machine.title === "string" ? machine.title : "Unbenannter Automat",
-        states: withUniqueNames(machine.states.map((s) => ({ ...s, initial: Boolean(s.initial), final: Boolean(s.final) }))),
+        states: withUniqueNames(withSingleInitial(states)),
         transitions: machine.transitions,
     };
+}
+
+function isObject(value: unknown): boolean {
+    return typeof value === "object" && value !== null;
 }

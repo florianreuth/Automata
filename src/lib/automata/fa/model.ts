@@ -3,7 +3,7 @@
 //
 // Copyright (c) 2026 Florian Reuth <git@florianreuth.de>
 
-import { type Edge, EPSILON, type Machine, naturalCompare, type StateNode } from "../machine.ts";
+import { type Edge, EPSILON, EPSILON_ALIAS, type Machine, naturalCompare, type StateNode } from "../machine.ts";
 
 /** A single FA transition; an empty symbol is an λ-transition. */
 export interface FaTransition extends Edge {
@@ -93,7 +93,7 @@ export function parseSymbols(input: string): string[] {
     if (parts.length === 0) {
         return [""];
     }
-    return [...new Set(parts.map((part) => (part === EPSILON || part === "ε" || part.toLowerCase() === "eps" ? "" : part)))];
+    return [...new Set(parts.map((part) => (part === EPSILON || part === EPSILON_ALIAS || part.toLowerCase() === "eps" ? "" : part)))];
 }
 
 /** Formats stored symbols as an edge label such as "0, 1, λ". */

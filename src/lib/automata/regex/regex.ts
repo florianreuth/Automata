@@ -3,7 +3,7 @@
 //
 // Copyright (c) 2026 Florian Reuth <git@florianreuth.de>
 
-import { EPSILON } from "../machine.ts";
+import { EPSILON, EPSILON_ALIAS } from "../machine.ts";
 
 export type Regex =
     | { kind: "empty" }
@@ -24,7 +24,7 @@ export const POSTFIX_OPERATORS = new Map<string, "star" | "plus" | "optional">([
     ["+", "plus"],
     ["?", "optional"],
 ]);
-const RESERVED = new Set(["|", "(", ")", "\\", EPSILON, "ε", EMPTY_SET, ...POSTFIX_OPERATORS.keys()]);
+const RESERVED = new Set(["|", "(", ")", "\\", EPSILON, EPSILON_ALIAS, EMPTY_SET, ...POSTFIX_OPERATORS.keys()]);
 
 /** Formats a regular expression with as few parentheses as possible. */
 export function formatRegex(regex: Regex): string {
