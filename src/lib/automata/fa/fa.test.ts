@@ -74,6 +74,16 @@ describe("toDfa", () => {
             }
         }
     });
+
+    it("keeps subsets apart whose states share a name", () => {
+        const nfa = createFiniteAutomaton();
+        nfa.states = [
+            { id: "a", name: "q", x: 0, y: 0, initial: true, final: false },
+            { id: "b", name: "q", x: 0, y: 0, initial: false, final: true },
+        ];
+        nfa.transitions = [{ id: "t", from: "a", to: "b", symbol: "a" }];
+        assert.equal(simulate(toDfa(nfa), "a").accepted, true);
+    });
 });
 
 describe("minimizeDfa", () => {

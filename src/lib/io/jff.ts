@@ -3,7 +3,7 @@
 //
 // Copyright (c) 2026 Florian Reuth <git@florianreuth.de>
 
-import { createId } from "../automata/machine.ts";
+import { createId, withUniqueNames } from "../automata/machine.ts";
 import type { FiniteAutomaton } from "../automata/fa/model.ts";
 import { escapeMarkup } from "../markup.ts";
 
@@ -75,5 +75,5 @@ export function faFromJff(xml: string, title: string): FiniteAutomaton {
         }
         return { id: createId(), from, to, symbol };
     });
-    return { kind: "fa", title, states, transitions };
+    return { kind: "fa", title, states: withUniqueNames(states), transitions };
 }

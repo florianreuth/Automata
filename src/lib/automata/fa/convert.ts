@@ -24,7 +24,7 @@ export function toDfa(fa: FiniteAutomaton): FiniteAutomaton {
     const names = new Map(fa.states.map((state) => [state.id, state.name]));
     const finals = new Set(fa.states.filter((state) => state.final).map((state) => state.id));
     const sortedNames = (set: ReadonlySet<string>) => [...set].map((id) => names.get(id)!).sort(naturalCompare);
-    const keyOf = (set: ReadonlySet<string>) => sortedNames(set).join(",");
+    const keyOf = (set: ReadonlySet<string>) => [...set].sort().join(",");
 
     const subsets: Set<string>[] = [];
     const indexByKey = new Map<string, number>();

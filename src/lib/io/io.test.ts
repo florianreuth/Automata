@@ -26,6 +26,14 @@ describe("JSON documents", () => {
         assert.throws(() => faFromJson(JSON.stringify({ ...valid, version: 99 })), /neuere Version/);
         assert.throws(() => faFromJson(JSON.stringify(dangling)), /fehlerhafte Zustände oder Übergänge/);
     });
+
+    it("rename repeated state names", () => {
+        const fa = example("ends-with-01");
+        const names = ["q", "q", "q_2"];
+        fa.states = fa.states.slice(0, names.length).map((state, i) => ({ ...state, name: names[i] }));
+        fa.transitions = [];
+        assert.deepEqual(faFromJson(faToJson(fa)).states.map((state) => state.name), ["q", "q_3", "q_2"]);
+    });
 });
 
 describe("faToJff", () => {

@@ -4,6 +4,7 @@
 // Copyright (c) 2026 Florian Reuth <git@florianreuth.de>
 
 import type { FiniteAutomaton } from "../automata/fa/model.ts";
+import { withUniqueNames } from "../automata/machine.ts";
 
 const FORMAT = "automata";
 const VERSION = 1;
@@ -38,7 +39,7 @@ export function faFromJson(json: string): FiniteAutomaton {
     return {
         kind: "fa",
         title: typeof machine.title === "string" ? machine.title : "Unbenannter Automat",
-        states: machine.states.map((s) => ({ ...s, initial: Boolean(s.initial), final: Boolean(s.final) })),
+        states: withUniqueNames(machine.states.map((s) => ({ ...s, initial: Boolean(s.initial), final: Boolean(s.final) }))),
         transitions: machine.transitions,
     };
 }

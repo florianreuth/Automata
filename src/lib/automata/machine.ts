@@ -49,6 +49,25 @@ export function formatSet(items: Iterable<string>): string {
     return list.length === 0 ? "∅" : `{${list.join(", ")}}`;
 }
 
+/** Renames every repeated state name to name_2, name_3, … so imported files satisfy the unique-name rule of the editor. */
+export function withUniqueNames<S extends StateNode>(states: readonly S[]): S[] {
+    const used = new Set(states.map((state) => state.name));
+    const seen = new Set<string>();
+    return states.map((state) => {
+        if (!seen.has(state.name)) {
+            seen.add(state.name);
+            return state;
+        }
+        let index = 2;
+        while (used.has(`${state.name}_${index}`)) {
+            index++;
+        }
+        const name = `${state.name}_${index}`;
+        used.add(name);
+        return { ...state, name };
+    });
+}
+
 /** Proposes the lowest unused state name prefix + n. */
 export function nextStateName(states: readonly StateNode[], prefix = "q"): string {
     const used = new Set(states.map((state) => state.name));
