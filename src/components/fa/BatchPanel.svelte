@@ -7,7 +7,6 @@
 
 <script lang="ts">
     import { untrack } from "svelte";
-    import { EPSILON, EPSILON_ALIAS } from "../../lib/automata/machine.ts";
     import type { FiniteAutomaton } from "../../lib/automata/fa/model.ts";
     import { simulate } from "../../lib/automata/fa/simulate.ts";
 
@@ -26,10 +25,7 @@
             .split("\n")
             .map((line) => line.trim())
             .filter((line) => line.length > 0)
-            .map((line) => {
-                const word = line === EPSILON || line === EPSILON_ALIAS ? "" : line;
-                return { line, accepted: simulate(fa, word).accepted };
-            }),
+            .map((line) => ({ line, accepted: simulate(fa, line).accepted })),
     );
     const acceptedCount = $derived(results.filter((result) => result.accepted).length);
 </script>

@@ -3,7 +3,7 @@
 //
 // Copyright (c) 2026 Florian Reuth <git@florianreuth.de>
 
-import { naturalCompare, type StateNode } from "../machine.ts";
+import { EPSILON, EPSILON_ALIAS, naturalCompare, type StateNode } from "../machine.ts";
 import { alphabetOf, type FaTransition, type FiniteAutomaton, initialStateOf } from "./model.ts";
 
 /** The set of active states after reading a prefix of the input. */
@@ -49,8 +49,12 @@ export function move(fa: FiniteAutomaton, states: ReadonlySet<string>, symbol: s
     return result;
 }
 
-/** Splits a word at whitespace if it has any, otherwise greedily by the longest alphabet symbol; other characters become single symbols. */
+/** Splits a word at whitespace if it has any, otherwise greedily by the longest alphabet symbol; other characters become single symbols and λ/ε are dropped. */
 export function tokenizeWord(word: string, alphabet: readonly string[]): string[] {
+    return splitWord(word, alphabet).filter((symbol) => symbol !== EPSILON && symbol !== EPSILON_ALIAS);
+}
+
+function splitWord(word: string, alphabet: readonly string[]): string[] {
     if (/\s/.test(word)) {
         return word.split(/\s+/).filter((part) => part.length > 0);
     }

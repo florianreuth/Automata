@@ -38,6 +38,7 @@ describe("simulate", () => {
     it("applies the λ-closure", () => {
         const fa = example("epsilon-ab");
         assert.equal(simulate(fa, "").accepted, true);
+        assert.equal(simulate(fa, "λ").accepted, true);
         assert.equal(simulate(fa, "aabbb").accepted, true);
         assert.equal(simulate(fa, "aba").accepted, false);
         assert.deepEqual(simulate(fa, "c").unknownSymbols, ["c"]);
@@ -160,6 +161,13 @@ describe("tokenizeWord", () => {
         assert.deepEqual(tokenizeWord("halx", alphabet), ["hal", "x"]);
         assert.deepEqual(tokenizeWord("0101", ["0", "1"]), ["0", "1", "0", "1"]);
         assert.deepEqual(tokenizeWord("", alphabet), []);
+    });
+
+    it("reads λ and ε as the empty word", () => {
+        assert.deepEqual(tokenizeWord("λ", alphabet), []);
+        assert.deepEqual(tokenizeWord("ε", alphabet), []);
+        assert.deepEqual(tokenizeWord("aλa", alphabet), ["a", "a"]);
+        assert.deepEqual(tokenizeWord("hallo λ welt", alphabet), ["hallo", "welt"]);
     });
 
     it("lets automata read words as symbols", () => {

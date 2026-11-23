@@ -70,7 +70,7 @@
             bind:value={input}
             oninput={() => (running = false)}
             onkeydown={(event) => event.key === "Enter" && start()}
-            placeholder="Wort eingeben, z. B. 0101"
+            placeholder="Wort eingeben, z. B. 0101 oder λ"
             spellcheck="false"
             autocomplete="off"
         />
