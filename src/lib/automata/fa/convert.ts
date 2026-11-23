@@ -91,6 +91,40 @@ export function addTrapState(fa: FiniteAutomaton): FiniteAutomaton {
 }
 
 /**
+ * Removes all λ-transitions without changing the language: each state reads every symbol its λ-closure can read
+ * and becomes final if its closure contains a final state. States, positions and existing symbol transitions are kept;
+ * returns the automaton unchanged if it has no λ-transitions.
+ */
+export function removeEpsilonTransitions(fa: FiniteAutomaton): FiniteAutomaton {
+    if (!fa.transitions.some((t) => t.symbol === "")) {
+        return fa;
+    }
+    const finals = new Set(fa.states.filter((state) => state.final).map((state) => state.id));
+    const closures = new Map(fa.states.map((state) => [state.id, epsilonClosure(fa, [state.id])]));
+    const transitions = new Map<string, FaTransition>();
+    const add = (from: string, to: string, symbol: string, id = createId()) => {
+        const key = [from, to, symbol].join("\u0000");
+        if (!transitions.has(key)) {
+            transitions.set(key, { id, from, to, symbol });
+        }
+    };
+    for (const t of fa.transitions) {
+        if (t.symbol !== "") {
+            add(t.from, t.to, t.symbol, t.id);
+        }
+    }
+    for (const [from, closure] of closures) {
+        for (const t of fa.transitions) {
+            if (t.symbol !== "" && t.from !== from && closure.has(t.from)) {
+                add(from, t.to, t.symbol);
+            }
+        }
+    }
+    const states = fa.states.map((state) => ({ ...state, final: [...closures.get(state.id)!].some((id) => finals.has(id)) }));
+    return { ...fa, states, transitions: [...transitions.values()] };
+}
+
+/**
  * Converts an automaton into the minimal complete DFA of its language using Moore's partition refinement.
  * NFAs are determinized first. For DFA input, state labels list the merged original states (∅ for an added trap state).
  * @throws Error if the automaton has no initial state

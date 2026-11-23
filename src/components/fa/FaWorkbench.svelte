@@ -7,7 +7,7 @@
 
 <script lang="ts">
     import { onMount, tick } from "svelte";
-    import { addTrapState, minimizeDfa, toDfa } from "../../lib/automata/fa/convert.ts";
+    import { addTrapState, minimizeDfa, removeEpsilonTransitions, toDfa } from "../../lib/automata/fa/convert.ts";
     import { faExamples } from "../../lib/automata/fa/examples.ts";
     import { createFiniteAutomaton, type FaTransition, type FiniteAutomaton } from "../../lib/automata/fa/model.ts";
     import { FaEditor } from "../../lib/editor/fa-editor.svelte.ts";
@@ -147,6 +147,7 @@
     const convertToDfa = () => replaceWith(toDfa, (_, after) => `In einen DEA mit ${after} Zuständen umgewandelt.`);
     const minimize = () => replaceWith(minimizeDfa, (before, after) => `Minimal-DEA mit ${after} Zuständen erzeugt (vorher ${before}).`);
     const addTrap = () => replaceWith(addTrapState, () => "Fehlerzustand ergänzt.");
+    const removeEpsilon = () => replaceWith(removeEpsilonTransitions, () => "λ-Übergänge entfernt.");
 
     function onKeyDown(event: KeyboardEvent) {
         // Typing in fields and dialogs must not trigger editor shortcuts.
@@ -221,7 +222,7 @@
                 {:else if tab === "batch"}
                     <BatchPanel fa={editor.machine}/>
                 {:else}
-                    <PropertiesPanel fa={editor.machine} onconvert={convertToDfa} onminimize={minimize} onaddtrap={addTrap}/>
+                    <PropertiesPanel fa={editor.machine} onconvert={convertToDfa} onminimize={minimize} onaddtrap={addTrap} onremoveepsilon={removeEpsilon}/>
                 {/if}
             </div>
         </aside>

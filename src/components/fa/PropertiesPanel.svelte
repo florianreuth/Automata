@@ -20,9 +20,10 @@
         onconvert: () => void;
         onminimize: () => void;
         onaddtrap: () => void;
+        onremoveepsilon: () => void;
     }
 
-    let { fa, onconvert, onminimize, onaddtrap }: Props = $props();
+    let { fa, onconvert, onminimize, onaddtrap, onremoveepsilon }: Props = $props();
 
     const deterministic = $derived(isDeterministic(fa));
     const complete = $derived(isComplete(fa));
@@ -88,6 +89,7 @@
 
     <h3>Umwandlungen</h3>
     <button class="button primary wide" onclick={onconvert} disabled={!initial}>NEA → DEA (Potenzmengenkonstruktion)</button>
+    <button class="button wide" onclick={onremoveepsilon} disabled={!hasEpsilon}>λ-NEA → NEA (λ-Übergänge entfernen)</button>
     <button class="button wide" onclick={onminimize} disabled={!initial}>EA → Minimal-DEA (Zustandsminimierung)</button>
     <button class="button wide" onclick={onaddtrap} disabled={missingTransitions(fa).length === 0}>Fehlerzustand ergänzen</button>
     <p class="hint">Diese Umwandlungen ändern den aktuellen Automaten und lassen sich mit Strg+Z rückgängig machen.</p>

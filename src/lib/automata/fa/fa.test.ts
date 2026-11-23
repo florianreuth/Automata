@@ -5,13 +5,15 @@
 
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { addTrapState, minimizeDfa, toDfa } from "./convert.ts";
+import { addTrapState, minimizeDfa, removeEpsilonTransitions, toDfa } from "./convert.ts";
 import { definitionToLatex, definitionToText } from "./definition-export.ts";
 import { formalDefinition, transitionSignature } from "./definition.ts";
 import { faExamples } from "./examples.ts";
 import { layeredLayout } from "../../graph/layout.ts";
 import { createFiniteAutomaton, isComplete, isDeterministic, parseSymbols, unreachableStates } from "./model.ts";
 import { blockedStep, missingTransitions, simulate, stepTransitions, tokenizeWord } from "./simulate.ts";
+import { regexToNfa } from "../regex/convert.ts";
+import { parseRegex } from "../regex/parser.ts";
 
 const example = (id: string) => faExamples.find((e) => e.id === id)!.create();
 
@@ -226,6 +228,29 @@ describe("addTrapState", () => {
         const { states } = addTrapState(fa);
         assert.notEqual(states.at(-1)!.name, "qerror");
         assert.equal(new Set(states.map((state) => state.name)).size, states.length);
+    });
+});
+
+describe("removeEpsilonTransitions", () => {
+    const wordsUpTo = (alphabet: readonly string[], length: number): string[] =>
+        length === 0 ? [""] : ["", ...wordsUpTo(alphabet, length - 1).flatMap((word) => alphabet.map((symbol) => word + symbol))];
+
+    it("keeps the language and states of λ-NFAs", () => {
+        const automata = [example("epsilon-ab"), regexToNfa(parseRegex("(a|b)*abb|λ"), "Thompson")];
+        for (const fa of automata) {
+            const result = removeEpsilonTransitions(fa);
+            assert.equal(result.transitions.some((t) => t.symbol === ""), false);
+            assert.deepEqual(result.states.map(({ id, name, x, y, initial }) => ({ id, name, x, y, initial })),
+                fa.states.map(({ id, name, x, y, initial }) => ({ id, name, x, y, initial })));
+            for (const word of wordsUpTo(["a", "b"], 5)) {
+                assert.equal(simulate(result, word).accepted, simulate(fa, word).accepted, `${fa.title}: ${word}`);
+            }
+        }
+    });
+
+    it("leaves automata without λ-transitions alone", () => {
+        const fa = example("ends-with-01");
+        assert.equal(removeEpsilonTransitions(fa), fa);
     });
 });
 
