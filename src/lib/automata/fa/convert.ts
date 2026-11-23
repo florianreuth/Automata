@@ -9,6 +9,7 @@ import { alphabetOf, type FaTransition, type FiniteAutomaton, isDeterministic, r
 import { epsilonClosure, missingTransitions, move } from "./simulate.ts";
 
 const TRAP_DISTANCE = 200;
+const TRAP_NAME = "qerror";
 
 /**
  * Converts an NFA into an equivalent complete DFA using the powerset construction.
@@ -75,7 +76,7 @@ export function addTrapState(fa: FiniteAutomaton): FiniteAutomaton {
     }
     const trap: StateNode = {
         id: createId(),
-        name: nextStateName(fa.states),
+        name: fa.states.some((state) => state.name === TRAP_NAME) ? nextStateName(fa.states) : TRAP_NAME,
         label: "Fehlerzustand",
         x: Math.max(...fa.states.map((state) => state.x)) + TRAP_DISTANCE,
         y: fa.states.reduce((sum, state) => sum + state.y, 0) / fa.states.length,

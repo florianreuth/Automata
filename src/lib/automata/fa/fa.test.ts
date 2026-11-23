@@ -200,6 +200,7 @@ describe("addTrapState", () => {
         const completed = addTrapState(fa);
         const trap = completed.states.at(-1)!;
         assert.equal(completed.states.length, fa.states.length + 1);
+        assert.equal(trap.name, "qerror");
         assert.equal(trap.final, false);
         assert.ok(trap.x > Math.max(...fa.states.map((state) => state.x)));
         assert.deepEqual(completed.states.slice(0, -1), fa.states);
@@ -217,6 +218,14 @@ describe("addTrapState", () => {
         assert.equal(isComplete(addTrapState(partial)), true);
         const complete = example("signed-binary");
         assert.equal(addTrapState(complete), complete);
+    });
+
+    it("falls back to a fresh name when qerror is taken", () => {
+        const fa = example("ends-with-01");
+        fa.states[0].name = "qerror";
+        const { states } = addTrapState(fa);
+        assert.notEqual(states.at(-1)!.name, "qerror");
+        assert.equal(new Set(states.map((state) => state.name)).size, states.length);
     });
 });
 
