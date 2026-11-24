@@ -6,7 +6,7 @@
 -->
 
 <script lang="ts">
-    import { EPSILON, formatSet } from "../../lib/automata/machine.ts";
+    import { formatSet, LAMBDA } from "../../lib/automata/machine.ts";
     import { formatProduction, type Grammar } from "../../lib/grammar/grammar.ts";
     import { analyzeLl1, parseLl1 } from "../../lib/grammar/ll1.ts";
     import ParseTreeView from "./ParseTreeView.svelte";
@@ -34,7 +34,7 @@
                 {#each analysis.nonterminals as nonterminal (nonterminal)}
                     <tr>
                         <th scope="row">{nonterminal}</th>
-                        <td>{formatSet([...analysis.first.get(nonterminal)!, ...(analysis.nullable.has(nonterminal) ? [EPSILON] : [])])}</td>
+                        <td>{formatSet([...analysis.first.get(nonterminal)!, ...(analysis.nullable.has(nonterminal) ? [LAMBDA] : [])])}</td>
                         <td>{formatSet(analysis.follow.get(nonterminal)!)}</td>
                     </tr>
                 {/each}

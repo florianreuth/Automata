@@ -4,9 +4,9 @@
 // Copyright (c) 2026 Florian Reuth <git@florianreuth.de>
 
 /** Display symbol for the empty word. Stored internally as the empty string, like JFLAP does. */
-export const EPSILON = "λ";
+export const LAMBDA = "λ";
 /** Alternative input notation for the empty word, accepted wherever λ is. */
-export const EPSILON_ALIAS = "ε";
+export const EPSILON = "ε";
 
 /** A state as drawn on the canvas; shared by all machine types. */
 export interface StateNode {

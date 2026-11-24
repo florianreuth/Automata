@@ -3,7 +3,7 @@
 //
 // Copyright (c) 2026 Florian Reuth <git@florianreuth.de>
 
-import { EPSILON, EPSILON_ALIAS, naturalCompare } from "../automata/machine.ts";
+import { EPSILON, LAMBDA, naturalCompare } from "../automata/machine.ts";
 
 /** End-of-input marker of the parsers; reserved, so it cannot be used as a terminal. */
 export const END_MARKER = "$";
@@ -119,7 +119,7 @@ export function linearity(grammar: Grammar): "right" | "left" | null {
 /** Joins symbols without spaces unless a multi-character nonterminal would make that ambiguous; λ if empty. */
 function formatSentence(symbols: readonly string[]): string {
     if (symbols.length === 0) {
-        return EPSILON;
+        return LAMBDA;
     }
     return symbols.join(symbols.some((symbol) => symbol.length > 1) ? " " : "");
 }
@@ -140,5 +140,5 @@ export function formatGrammar(grammar: Grammar): string {
 
 /** Splits text into grammar symbols; λ and ε denote the empty word and are dropped. */
 export function tokenize(text: string): string[] {
-    return (text.match(SYMBOL) ?? []).filter((symbol) => symbol !== EPSILON && symbol !== EPSILON_ALIAS);
+    return (text.match(SYMBOL) ?? []).filter((symbol) => symbol !== LAMBDA && symbol !== EPSILON);
 }

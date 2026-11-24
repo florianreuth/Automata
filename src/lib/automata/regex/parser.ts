@@ -3,8 +3,8 @@
 //
 // Copyright (c) 2026 Florian Reuth <git@florianreuth.de>
 
-import { EPSILON, EPSILON_ALIAS } from "../machine.ts";
-import { EMPTY, EMPTY_SET, EPSILON_REGEX, POSTFIX_OPERATORS, type Regex, symbol } from "./regex.ts";
+import { EPSILON, LAMBDA } from "../machine.ts";
+import { EMPTY, EMPTY_SET, LAMBDA_REGEX, POSTFIX_OPERATORS, type Regex, symbol } from "./regex.ts";
 
 /** A syntax error with the zero-based code point position in the source. */
 export class RegexSyntaxError extends Error {
@@ -70,7 +70,7 @@ class RegexParser {
             items.push(this.#postfix());
         }
         if (items.length === 0) {
-            return EPSILON_REGEX;
+            return LAMBDA_REGEX;
         }
         return items.length === 1 ? items[0] : { kind: "concat", items };
     }
@@ -95,9 +95,9 @@ class RegexParser {
                 }
                 return inner;
             }
+            case LAMBDA:
             case EPSILON:
-            case EPSILON_ALIAS:
-                return EPSILON_REGEX;
+                return LAMBDA_REGEX;
             case EMPTY_SET:
                 return EMPTY;
             case "\\": {

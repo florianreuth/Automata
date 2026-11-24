@@ -110,9 +110,9 @@ describe("CNF and CYK", () => {
 describe("layoutTree", () => {
     it("centers parents above their leaves", () => {
         const layout = layoutTree({ symbol: "S", children: [{ symbol: "a", children: [] }, { symbol: "", children: [] }] });
-        const [a, epsilon, root] = layout.nodes;
-        assert.equal(root.x, (a.x + epsilon.x) / 2);
-        assert.equal(epsilon.label, "λ");
+        const [a, lambda, root] = layout.nodes;
+        assert.equal(root.x, (a.x + lambda.x) / 2);
+        assert.equal(lambda.label, "λ");
         assert.ok(root.y < a.y);
     });
 });
@@ -122,7 +122,7 @@ describe("faToGrammar", () => {
 
     it("writes transitions, λ-moves and final states as right-linear productions", () => {
         assert.equal(formatGrammar(faToGrammar(faExample("ends-with-01"))), "S → 0S | 0A | 1S\nA → 1B\nB → λ");
-        assert.equal(formatGrammar(faToGrammar(faExample("epsilon-ab"))), "S → aS | A | λ\nA → bA | λ");
+        assert.equal(formatGrammar(faToGrammar(faExample("lambda-ab"))), "S → aS | A | λ\nA → bA | λ");
     });
 
     it("produces a regular grammar for the same language", () => {

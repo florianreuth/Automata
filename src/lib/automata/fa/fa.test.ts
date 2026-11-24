@@ -5,7 +5,7 @@
 
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { addTrapState, minimizeDfa, removeEpsilonTransitions, toDfa } from "./convert.ts";
+import { addTrapState, minimizeDfa, removeLambdaTransitions, toDfa } from "./convert.ts";
 import { definitionToLatex, definitionToText } from "./definition-export.ts";
 import { formalDefinition, transitionSignature } from "./definition.ts";
 import { faExamples } from "./examples.ts";
@@ -36,7 +36,7 @@ describe("simulate", () => {
     });
 
     it("applies the λ-closure", () => {
-        const fa = example("epsilon-ab");
+        const fa = example("lambda-ab");
         assert.equal(simulate(fa, "").accepted, true);
         assert.equal(simulate(fa, "λ").accepted, true);
         assert.equal(simulate(fa, "aabbb").accepted, true);
@@ -47,7 +47,7 @@ describe("simulate", () => {
 
 describe("stepTransitions", () => {
     it("lists the symbol moves into a step and the λ-moves inside it", () => {
-        const fa = example("epsilon-ab");
+        const fa = example("lambda-ab");
         const result = simulate(fa, "ab");
         const used = (step: number) => stepTransitions(fa, result, step).map((t) => t.symbol || "λ").sort();
         assert.deepEqual(used(0), ["λ"]);
@@ -137,7 +137,7 @@ describe("formalDefinition", () => {
     });
 
     it("uses sets and λ for nondeterministic automata", () => {
-        const definition = formalDefinition(example("epsilon-ab"));
+        const definition = formalDefinition(example("lambda-ab"));
         assert.equal(transitionSignature(definition), "δ: Q × (Σ ∪ {λ}) → 𝒫(Q)");
         assert.deepEqual(definition.columns, ["a", "b", ""]);
         assert.match(definitionToText(definition), /→\*q0 │ \{q0\} │ ∅ +│ \{q1\}/);
@@ -186,7 +186,7 @@ describe("tokenizeWord", () => {
 
 describe("blockedStep", () => {
     it("finds the symbol on which a run dies", () => {
-        const fa = example("epsilon-ab");
+        const fa = example("lambda-ab");
         assert.equal(blockedStep(simulate(fa, "aabb")), null);
         const blocked = blockedStep(simulate(fa, "aba"))!;
         assert.equal(blocked.position, 3);
@@ -200,7 +200,7 @@ describe("missingTransitions", () => {
         assert.deepEqual(missingTransitions(example("signed-binary")), []);
         const missing = missingTransitions(example("ends-with-01")).map((m) => `${m.state.name}:${m.symbol}`);
         assert.deepEqual(missing, ["q1:0", "q2:0", "q2:1"]);
-        assert.deepEqual(missingTransitions(example("epsilon-ab")).map((m) => `${m.state.name}:${m.symbol}`), ["q1:a"]);
+        assert.deepEqual(missingTransitions(example("lambda-ab")).map((m) => `${m.state.name}:${m.symbol}`), ["q1:a"]);
     });
 });
 
@@ -239,14 +239,14 @@ describe("addTrapState", () => {
     });
 });
 
-describe("removeEpsilonTransitions", () => {
+describe("removeLambdaTransitions", () => {
     const wordsUpTo = (alphabet: readonly string[], length: number): string[] =>
         length === 0 ? [""] : ["", ...wordsUpTo(alphabet, length - 1).flatMap((word) => alphabet.map((symbol) => word + symbol))];
 
     it("keeps the language and states of λ-NFAs", () => {
-        const automata = [example("epsilon-ab"), regexToNfa(parseRegex("(a|b)*abb|λ"), "Thompson")];
+        const automata = [example("lambda-ab"), regexToNfa(parseRegex("(a|b)*abb|λ"), "Thompson")];
         for (const fa of automata) {
-            const result = removeEpsilonTransitions(fa);
+            const result = removeLambdaTransitions(fa);
             assert.equal(result.transitions.some((t) => t.symbol === ""), false);
             assert.deepEqual(result.states.map(({ id, name, x, y, initial }) => ({ id, name, x, y, initial })),
                 fa.states.map(({ id, name, x, y, initial }) => ({ id, name, x, y, initial })));
@@ -258,7 +258,7 @@ describe("removeEpsilonTransitions", () => {
 
     it("leaves automata without λ-transitions alone", () => {
         const fa = example("ends-with-01");
-        assert.equal(removeEpsilonTransitions(fa), fa);
+        assert.equal(removeLambdaTransitions(fa), fa);
     });
 });
 

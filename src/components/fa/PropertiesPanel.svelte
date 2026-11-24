@@ -20,14 +20,14 @@
         onconvert: () => void;
         onminimize: () => void;
         onaddtrap: () => void;
-        onremoveepsilon: () => void;
+        onremovelambda: () => void;
     }
 
-    let { fa, onconvert, onminimize, onaddtrap, onremoveepsilon }: Props = $props();
+    let { fa, onconvert, onminimize, onaddtrap, onremovelambda }: Props = $props();
 
     const deterministic = $derived(isDeterministic(fa));
     const complete = $derived(isComplete(fa));
-    const hasEpsilon = $derived(fa.transitions.some((t) => t.symbol === ""));
+    const hasLambda = $derived(fa.transitions.some((t) => t.symbol === ""));
     const alphabet = $derived(alphabetOf(fa));
     const initial = $derived(initialStateOf(fa));
     const finals = $derived(fa.states.filter((state) => state.final).map((state) => state.name).sort(naturalCompare));
@@ -55,7 +55,7 @@
             ? complete
                 ? "Deterministisch (DEA), vollständig"
                 : "Deterministisch (DEA), partiell"
-            : hasEpsilon
+            : hasLambda
               ? "Nichtdeterministisch mit λ-Übergängen (λ-NEA)"
               : "Nichtdeterministisch (NEA)",
     );
@@ -89,7 +89,7 @@
 
     <h3>Umwandlungen</h3>
     <button class="button primary wide" onclick={onconvert} disabled={!initial}>NEA → DEA (Potenzmengenkonstruktion)</button>
-    <button class="button wide" onclick={onremoveepsilon} disabled={!hasEpsilon}>λ-NEA → NEA (λ-Übergänge entfernen)</button>
+    <button class="button wide" onclick={onremovelambda} disabled={!hasLambda}>λ-NEA → NEA (λ-Übergänge entfernen)</button>
     <button class="button wide" onclick={onminimize} disabled={!initial}>EA → Minimal-DEA (Zustandsminimierung)</button>
     <button class="button wide" onclick={onaddtrap} disabled={missingTransitions(fa).length === 0}>Fehlerzustand ergänzen</button>
     <p class="hint">Diese Umwandlungen ändern den aktuellen Automaten und lassen sich mit Strg+Z rückgängig machen.</p>

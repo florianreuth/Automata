@@ -6,7 +6,7 @@
 import { applyLayout } from "../../graph/layout.ts";
 import { createId, naturalCompare, type StateNode } from "../machine.ts";
 import { type FaTransition, type FiniteAutomaton, requireInitialState } from "../fa/model.ts";
-import { concat, EMPTY, EPSILON_REGEX, type Regex, star, symbol, union } from "./regex.ts";
+import { concat, EMPTY, LAMBDA_REGEX, type Regex, star, symbol, union } from "./regex.ts";
 
 const SOURCE = "#source";
 const SINK = "#sink";
@@ -27,7 +27,7 @@ export function regexToNfa(regex: Regex, title: string): FiniteAutomaton {
         switch (node.kind) {
             case "empty":
                 return { start: addState(), end: addState() };
-            case "epsilon":
+            case "lambda":
             case "symbol": {
                 const start = addState();
                 const end = addState();
@@ -88,12 +88,12 @@ export function faToRegex(fa: FiniteAutomaton): Regex {
         const existing = row.get(to);
         row.set(to, existing ? union(existing, regex) : regex);
     };
-    add(SOURCE, initial.id, EPSILON_REGEX);
+    add(SOURCE, initial.id, LAMBDA_REGEX);
     for (const state of fa.states.filter((s) => s.final)) {
-        add(state.id, SINK, EPSILON_REGEX);
+        add(state.id, SINK, LAMBDA_REGEX);
     }
     for (const t of fa.transitions) {
-        add(t.from, t.to, t.symbol === "" ? EPSILON_REGEX : symbol(t.symbol));
+        add(t.from, t.to, t.symbol === "" ? LAMBDA_REGEX : symbol(t.symbol));
     }
 
     const incomingOf = (id: string) => [...edges].filter(([from, row]) => from !== id && row.has(id)).map(([from, row]) => [from, row.get(id)!] as const);

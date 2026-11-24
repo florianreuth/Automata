@@ -3,7 +3,7 @@
 //
 // Copyright (c) 2026 Florian Reuth <git@florianreuth.de>
 
-import { EPSILON } from "../automata/machine.ts";
+import { LAMBDA } from "../automata/machine.ts";
 
 const COLUMN_WIDTH = 44;
 const ROW_HEIGHT = 56;
@@ -35,7 +35,7 @@ export function layoutTree(tree: ParseTree): TreeLayout {
         const y = PADDING + depth * ROW_HEIGHT;
         const children = node.children.map((child) => place(child, depth + 1));
         const x = children.length > 0 ? (children[0].x + children.at(-1)!.x) / 2 : PADDING + nextLeaf++ * COLUMN_WIDTH;
-        layout.nodes.push({ label: node.symbol === "" ? EPSILON : node.symbol, x, y: y + TEXT_BASELINE, leaf: children.length === 0 });
+        layout.nodes.push({ label: node.symbol === "" ? LAMBDA : node.symbol, x, y: y + TEXT_BASELINE, leaf: children.length === 0 });
         layout.edges.push(...children.map((child) => ({ x1: x, y1: y + EDGE_GAP_BELOW, x2: child.x, y2: child.y - EDGE_GAP_ABOVE })));
         layout.width = Math.max(layout.width, x + PADDING);
         layout.height = Math.max(layout.height, y + PADDING);

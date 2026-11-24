@@ -15,7 +15,7 @@ const example = (id: string) => faExamples.find((e) => e.id === id)!.create();
 
 describe("JSON documents", () => {
     it("round-trip an automaton", () => {
-        const fa = example("epsilon-ab");
+        const fa = example("lambda-ab");
         assert.deepEqual(faFromJson(faToJson(fa)), fa);
     });
 
@@ -47,7 +47,7 @@ describe("JSON documents", () => {
 
 describe("faToJff", () => {
     it("writes λ as an empty read and escapes names", () => {
-        const fa = example("epsilon-ab");
+        const fa = example("lambda-ab");
         fa.states[0].name = "<q0>";
         const jff = faToJff(fa);
         assert.match(jff, /<read\/>/);

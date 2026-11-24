@@ -36,7 +36,7 @@ export function toCnf(grammar: Grammar): Grammar {
     }
     rules = replaceTerminals(rules, fresh);
     rules = binarize(rules, fresh);
-    rules = removeEpsilonRules(rules, start);
+    rules = removeLambdaRules(rules, start);
     rules = removeUnitRules(rules);
     rules = removeUselessRules(rules, start);
 
@@ -92,7 +92,7 @@ function binarize(rules: Rule[], fresh: (prefix: string) => string): Rule[] {
     });
 }
 
-function removeEpsilonRules(rules: Rule[], start: string): Rule[] {
+function removeLambdaRules(rules: Rule[], start: string): Rule[] {
     const nullable = new Set<string>();
     for (let changed = true; changed; ) {
         changed = false;

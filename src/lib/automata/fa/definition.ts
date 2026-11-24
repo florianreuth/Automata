@@ -3,7 +3,7 @@
 //
 // Copyright (c) 2026 Florian Reuth <git@florianreuth.de>
 
-import { EPSILON, formatSet, naturalCompare } from "../machine.ts";
+import { formatSet, LAMBDA, naturalCompare } from "../machine.ts";
 import { alphabetOf, type FiniteAutomaton, initialStateOf, isDeterministic } from "./model.ts";
 
 export interface TransitionRow {
@@ -60,7 +60,7 @@ export function transitionSignature(definition: FormalDefinition): string {
     if (definition.deterministic) {
         return "δ: Q × Σ → Q";
     }
-    const domain = definition.columns.includes("") ? `Q × (Σ ∪ {${EPSILON}})` : "Q × Σ";
+    const domain = definition.columns.includes("") ? `Q × (Σ ∪ {${LAMBDA}})` : "Q × Σ";
     return `δ: ${domain} → 𝒫(Q)`;
 }
 

@@ -6,7 +6,7 @@
 import { applyLayout } from "../../graph/layout.ts";
 import { createId, formatSet, naturalCompare, nextStateName, type StateNode } from "../machine.ts";
 import { alphabetOf, type FaTransition, type FiniteAutomaton, isDeterministic, requireInitialState } from "./model.ts";
-import { epsilonClosure, missingTransitions, move } from "./simulate.ts";
+import { lambdaClosure, missingTransitions, move } from "./simulate.ts";
 
 const TRAP_DISTANCE = 200;
 const TRAP_NAME = "qerror";
@@ -38,10 +38,10 @@ export function toDfa(fa: FiniteAutomaton): FiniteAutomaton {
         return index;
     };
 
-    enqueue(epsilonClosure(fa, [initial.id]));
+    enqueue(lambdaClosure(fa, [initial.id]));
     for (let i = 0; i < subsets.length; i++) {
         for (const symbol of alphabet) {
-            const target = enqueue(epsilonClosure(fa, move(fa, subsets[i], symbol)));
+            const target = enqueue(lambdaClosure(fa, move(fa, subsets[i], symbol)));
             edges.push({ from: i, to: target, symbol });
         }
     }
@@ -95,12 +95,12 @@ export function addTrapState(fa: FiniteAutomaton): FiniteAutomaton {
  * and becomes final if its closure contains a final state. States, positions and existing symbol transitions are kept;
  * returns the automaton unchanged if it has no λ-transitions.
  */
-export function removeEpsilonTransitions(fa: FiniteAutomaton): FiniteAutomaton {
+export function removeLambdaTransitions(fa: FiniteAutomaton): FiniteAutomaton {
     if (!fa.transitions.some((t) => t.symbol === "")) {
         return fa;
     }
     const finals = new Set(fa.states.filter((state) => state.final).map((state) => state.id));
-    const closures = new Map(fa.states.map((state) => [state.id, epsilonClosure(fa, [state.id])]));
+    const closures = new Map(fa.states.map((state) => [state.id, lambdaClosure(fa, [state.id])]));
     const transitions = new Map<string, FaTransition>();
     const add = (from: string, to: string, symbol: string, id = createId()) => {
         const key = [from, to, symbol].join("\u0000");

@@ -3,7 +3,7 @@
 //
 // Copyright (c) 2026 Florian Reuth <git@florianreuth.de>
 
-import { createId, EPSILON } from "../machine.ts";
+import { createId, LAMBDA } from "../machine.ts";
 import type { FiniteAutomaton } from "./model.ts";
 
 /** A bundled example shown in the editor menu. */
@@ -32,7 +32,7 @@ function build(title: string, states: StateSpec[], transitions: TransitionSpec[]
         title,
         states: nodes,
         transitions: transitions.flatMap(([from, to, symbols]) =>
-            symbols.split(",").map((symbol) => ({ id: createId(), from: idOf(from), to: idOf(to), symbol: symbol === EPSILON ? "" : symbol })),
+            symbols.split(",").map((symbol) => ({ id: createId(), from: idOf(from), to: idOf(to), symbol: symbol === LAMBDA ? "" : symbol })),
         ),
     };
 }
@@ -85,7 +85,7 @@ export const faExamples: FaExample[] = [
             ),
     },
     {
-        id: "epsilon-ab",
+        id: "lambda-ab",
         title: "λ-Übergänge: a* b*",
         description: "NEA mit λ-Übergang für die Sprache a*b*.",
         create: () =>

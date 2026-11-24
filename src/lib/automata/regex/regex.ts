@@ -3,11 +3,11 @@
 //
 // Copyright (c) 2026 Florian Reuth <git@florianreuth.de>
 
-import { EPSILON, EPSILON_ALIAS } from "../machine.ts";
+import { EPSILON, LAMBDA } from "../machine.ts";
 
 export type Regex =
     | { kind: "empty" }
-    | { kind: "epsilon" }
+    | { kind: "lambda" }
     | { kind: "symbol"; symbol: string }
     | { kind: "union"; items: Regex[] }
     | { kind: "concat"; items: Regex[] }
@@ -16,7 +16,7 @@ export type Regex =
     | { kind: "optional"; item: Regex };
 
 export const EMPTY: Regex = { kind: "empty" };
-export const EPSILON_REGEX: Regex = { kind: "epsilon" };
+export const LAMBDA_REGEX: Regex = { kind: "lambda" };
 
 export const EMPTY_SET = "∅";
 export const POSTFIX_OPERATORS = new Map<string, "star" | "plus" | "optional">([
@@ -24,7 +24,7 @@ export const POSTFIX_OPERATORS = new Map<string, "star" | "plus" | "optional">([
     ["+", "plus"],
     ["?", "optional"],
 ]);
-const RESERVED = new Set(["|", "(", ")", "\\", EPSILON, EPSILON_ALIAS, EMPTY_SET, ...POSTFIX_OPERATORS.keys()]);
+const RESERVED = new Set(["|", "(", ")", "\\", LAMBDA, EPSILON, EMPTY_SET, ...POSTFIX_OPERATORS.keys()]);
 
 /** Formats a regular expression with as few parentheses as possible. */
 export function formatRegex(regex: Regex): string {
@@ -49,7 +49,7 @@ export function union(a: Regex, b: Regex): Regex {
     }
     // λ is redundant next to a starred alternative, which already matches the empty word.
     if ([...items.values()].some((item) => item.kind === "star")) {
-        items.delete(EPSILON);
+        items.delete(LAMBDA);
     }
     const unique = [...items.values()];
     return unique.length === 1 ? unique[0] : { kind: "union", items: unique };
@@ -60,10 +60,10 @@ export function concat(a: Regex, b: Regex): Regex {
     if (a.kind === "empty" || b.kind === "empty") {
         return EMPTY;
     }
-    if (a.kind === "epsilon") {
+    if (a.kind === "lambda") {
         return b;
     }
-    if (b.kind === "epsilon") {
+    if (b.kind === "lambda") {
         return a;
     }
     return { kind: "concat", items: [...itemsOf(a, "concat"), ...itemsOf(b, "concat")] };
@@ -73,8 +73,8 @@ export function concat(a: Regex, b: Regex): Regex {
 export function star(a: Regex): Regex {
     switch (a.kind) {
         case "empty":
-        case "epsilon":
-            return EPSILON_REGEX;
+        case "lambda":
+            return LAMBDA_REGEX;
         case "star":
             return a;
         case "plus":
@@ -95,8 +95,8 @@ function format(regex: Regex, context: number): string {
     switch (regex.kind) {
         case "empty":
             return EMPTY_SET;
-        case "epsilon":
-            return EPSILON;
+        case "lambda":
+            return LAMBDA;
         case "symbol": {
             const characters = [...regex.symbol];
             const text = characters.map((character) => (RESERVED.has(character) ? `\\${character}` : character)).join("");
